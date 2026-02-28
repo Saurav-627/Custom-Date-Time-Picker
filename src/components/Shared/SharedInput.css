@@ -34,7 +34,8 @@
     background: transparent;
     border: none;
     color: var(--text);
-    font-size: 1rem;
+    font-size: 16px;
+    /* Stop iOS Safari zoom on focus */
     width: 100%;
     font-weight: 500;
 }
