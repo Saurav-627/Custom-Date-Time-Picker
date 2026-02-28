@@ -127,10 +127,9 @@ input {
   left: 0 !important;
   right: 0 !important;
   top: auto !important;
-  border-radius: 24px 24px 0 0 !important;
+  border-radius: 20px 20px 0 0 !important;
   margin: 0 !important;
-  max-height: 65vh !important;
-  /* Shorter for better UX */
+  max-height: 48vh !important;
   width: 100% !important;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
   box-shadow: 0 -8px 32px var(--shadow-heavy);
@@ -167,12 +166,12 @@ input {
 .scroll-columns {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 140px;
-  /* Thinner */
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
   overflow: hidden;
   position: relative;
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -180,30 +179,33 @@ input {
 .scroll-columns::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 36px;
-  background: rgba(59, 130, 246, 0.1);
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  top: 44px;
+  /* Matches padding EXACTLY to perfectly bracket the central item */
+  left: 5%;
+  width: 90%;
+  height: 32px;
+  background: var(--hover-overlay);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   pointer-events: none;
   border-radius: 8px;
+  transform: none;
+  /* Removed translate to avoid half-pixel blurring */
 }
 
 .scroll-col {
   flex: 1;
   max-width: 70px;
-  /* Narrower columns */
+  height: 100%;
+  max-height: 120px;
   overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   scroll-snap-type: y mandatory;
-  padding: 52px 0;
-  /* Updated for 140px total height and 36px items */
+  padding: 44px 0;
   position: relative;
   z-index: 2;
 }
@@ -213,22 +215,24 @@ input {
 }
 
 .scroll-item {
-  height: 36px;
-  min-height: 36px;
+  height: 32px;
+  min-height: 32px;
+  line-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text-dim);
   transition: var(--transition);
   cursor: pointer;
   width: 100%;
   scroll-snap-align: center;
+  margin: 0;
 }
 
 .scroll-item.selected {
   font-weight: 700;
   color: var(--primary);
   opacity: 1;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
 }

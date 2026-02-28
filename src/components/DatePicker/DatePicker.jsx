@@ -16,14 +16,16 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     const [isFocused, setIsFocused] = useState(false);
     const pickerRef = useRef(null);
 
-    // Mobile Scroll Refs
     const yearRef = useRef(null);
     const monthRef = useRef(null);
     const dayRef = useRef(null);
+    const scrollTimeoutRef = useRef(null);
+    const openTimeRef = useRef(0);
 
     const years = Array.from({ length: 151 }, (_, i) => new Date().getFullYear() - 100 + i);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const daysArr = Array.from({ length: 31 }, (_, i) => i + 1);
+    const daysInMonth = new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, 0).getDate();
+    const daysArr = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
     // Sync input value with standard value if NOT focused OR closed
     useEffect(() => {
@@ -43,13 +45,17 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     // Handle initial scroll on mobile open
     useEffect(() => {
         if (isOpen && isMobile) {
-            const timer = setTimeout(() => {
+            const syncScrolls = () => {
                 const yIdx = years.indexOf(tempDate.getFullYear());
-                if (yearRef.current && yIdx !== -1) yearRef.current.scrollTo({ top: yIdx * 36, behavior: 'auto' });
-                if (monthRef.current) monthRef.current.scrollTo({ top: tempDate.getMonth() * 36, behavior: 'auto' });
-                if (dayRef.current) dayRef.current.scrollTo({ top: (tempDate.getDate() - 1) * 36, behavior: 'auto' });
-            }, 50);
-            return () => clearTimeout(timer);
+                if (yearRef.current && yIdx !== -1) yearRef.current.scrollTop = yIdx * 32;
+                if (monthRef.current) monthRef.current.scrollTop = tempDate.getMonth() * 32;
+                if (dayRef.current) dayRef.current.scrollTop = (tempDate.getDate() - 1) * 32;
+            };
+
+            syncScrolls(); // Immediate sync
+            const t1 = setTimeout(syncScrolls, 50);
+            const t2 = setTimeout(syncScrolls, 300); // Sync again after animation finishes
+            return () => { clearTimeout(t1); clearTimeout(t2); };
         }
     }, [isOpen, isMobile]);
 
@@ -57,16 +63,26 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     useEffect(() => {
         if (isOpen && isMobile) {
             const yIdx = years.indexOf(tempDate.getFullYear());
-            if (yearRef.current && yIdx !== -1) yearRef.current.scrollTo({ top: yIdx * 36, behavior: 'smooth' });
-            if (monthRef.current) monthRef.current.scrollTo({ top: tempDate.getMonth() * 36, behavior: 'smooth' });
-            if (dayRef.current) dayRef.current.scrollTo({ top: (tempDate.getDate() - 1) * 36, behavior: 'smooth' });
+            if (yearRef.current && Math.abs(yearRef.current.scrollTop - yIdx * 32) > 5) {
+                yearRef.current.scrollTo({ top: yIdx * 32, behavior: 'smooth' });
+            }
+            if (monthRef.current && Math.abs(monthRef.current.scrollTop - tempDate.getMonth() * 32) > 5) {
+                monthRef.current.scrollTo({ top: tempDate.getMonth() * 32, behavior: 'smooth' });
+            }
+            const dIdx = tempDate.getDate() - 1;
+            if (dayRef.current && Math.abs(dayRef.current.scrollTop - dIdx * 32) > 5) {
+                dayRef.current.scrollTo({ top: dIdx * 32, behavior: 'smooth' });
+            }
         }
     }, [tempDate]);
 
     const toggleOpen = () => {
         if (!isOpen) {
-            setTempDate(value ? new Date(value) : new Date());
+            const dateToUse = value ? new Date(value) : new Date();
+            setTempDate(dateToUse);
+            setCurrentMonth(dateToUse);
             setView('calendar');
+            openTimeRef.current = Date.now();
         }
         setIsOpen(!isOpen);
     };
@@ -125,6 +141,18 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Prevent body scroll when mobile picker is open
+    useEffect(() => {
+        if (isMobile && isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, isMobile]);
 
     const renderMonths = () => {
         return (
@@ -222,28 +250,58 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
             setTempDate(d);
         };
 
+        const handleWheelScroll = (e, part, arr) => {
+            if (Date.now() - openTimeRef.current < 500) return; // Ignore layout scroll events during opening animation
+
+            const top = e.target.scrollTop;
+            const activeIdx = Math.round(top / 32);
+            if (activeIdx >= 0 && activeIdx < arr.length) {
+                const newVal = arr[activeIdx];
+                if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+                scrollTimeoutRef.current = setTimeout(() => {
+                    let y = tempDate.getFullYear();
+                    let m = tempDate.getMonth();
+                    let day = tempDate.getDate();
+
+                    if (part === 'year') y = newVal;
+                    if (part === 'month') m = newVal;
+                    if (part === 'day') day = newVal;
+
+                    const maxDays = new Date(y, m + 1, 0).getDate();
+                    if (day > maxDays) day = maxDays;
+
+                    const newDate = new Date(y, m, day);
+                    newDate.setHours(tempDate.getHours(), tempDate.getMinutes(), tempDate.getSeconds(), tempDate.getMilliseconds());
+
+                    if (tempDate.getTime() !== newDate.getTime()) {
+                        setTempDate(newDate);
+                    }
+                }, 150);
+            }
+        };
+
         return (
             <div className="mobile-scroll-picker">
                 <div className="mobile-header">
                     <h3>Select Date</h3>
                     <span className="selected-preview">{format(tempDate, 'dd MMM yyyy')}</span>
                 </div>
-                <div className="scroll-columns">
-                    <div className="scroll-col year-col" ref={yearRef}>
+                <div className="scroll-columns" style={{ touchAction: 'pan-y' }}>
+                    <div className="scroll-col year-col" ref={yearRef} onScroll={(e) => handleWheelScroll(e, 'year', years)}>
                         {years.map(y => (
                             <div key={y} className={`scroll-item ${tempDate.getFullYear() === y ? 'selected' : ''}`} onClick={() => updateDate('year', y)}>
                                 {y}
                             </div>
                         ))}
                     </div>
-                    <div className="scroll-col month-col" ref={monthRef}>
+                    <div className="scroll-col month-col" ref={monthRef} onScroll={(e) => handleWheelScroll(e, 'month', months.map((_, i) => i))}>
                         {months.map((m, i) => (
                             <div key={m} className={`scroll-item ${tempDate.getMonth() === i ? 'selected' : ''}`} onClick={() => updateDate('month', i)}>
                                 {m}
                             </div>
                         ))}
                     </div>
-                    <div className="scroll-col day-col" ref={dayRef}>
+                    <div className="scroll-col day-col" ref={dayRef} onScroll={(e) => handleWheelScroll(e, 'day', daysArr)}>
                         {daysArr.map(d => (
                             <div key={d} className={`scroll-item ${tempDate.getDate() === d ? 'selected' : ''}`} onClick={() => updateDate('day', d)}>
                                 {d}
@@ -291,7 +349,7 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                             className={`picker-dropdown glass-card ${isMobile ? 'mobile' : 'desktop'}`}
                         >
-                            {isMobile ? renderMobileGrid() : renderCalendar()}
+                            {isMobile ? renderMobilePicker() : renderCalendar()}
                         </motion.div>
                     </>
                 )}

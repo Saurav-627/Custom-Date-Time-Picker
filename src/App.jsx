@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import DatePicker from './components/DatePicker/DatePicker'
 import TimePicker from './components/TimePicker/TimePicker'
 import './App.css'
 
-function App() {
+function Showcase() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedTime, setSelectedTime] = useState('11:00 AM')
   const [selectedTimeWithSeconds, setSelectedTimeWithSeconds] = useState('11:05:00 AM')
@@ -13,6 +14,9 @@ function App() {
       <header className="hero">
         <h1 className="title">Premium Pickers</h1>
         <p className="subtitle">Responsive Custom Date & Time Selectors</p>
+        <Link to="/simple" className="demo-link" style={{ marginTop: '16px', display: 'inline-block', color: 'var(--primary)', textDecoration: 'underline' }}>
+          Go to Simple Form View
+        </Link>
       </header>
 
       <div className="showcase glass-card">
@@ -57,18 +61,6 @@ function App() {
         </section>
       </div>
 
-      <section className="demo-footer glass-card">
-        <h3>Smart Positioning Demo</h3>
-        <p>Scroll down or resize to see the picker intelligent drop logic.</p>
-        <div style={{ padding: '20px' }}>
-          <DatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-            placeholder="Click to test smart position"
-          />
-        </div>
-      </section>
-
       <footer className="info">
         <p>Built with Vite + React + Framer Motion</p>
         <div className="features">
@@ -78,6 +70,57 @@ function App() {
         </div>
       </footer>
     </main>
+  )
+}
+
+function SimpleForm() {
+  const [date, setDate] = useState(null);
+  const [time, setTime] = useState('');
+
+  return (
+    <div className="simple-wrapper" style={{ padding: '40px 20px', maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      <Link to="/" style={{ color: 'var(--text-dim)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+        ← Back to Showcase
+      </Link>
+
+      <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text)', marginLeft: '4px' }}>Date of Birth</label>
+        <DatePicker
+          value={date}
+          onChange={setDate}
+          placeholder="YYYY/MM/DD"
+        />
+      </div>
+
+      <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <label style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text)', marginLeft: '4px' }}>Meeting Time</label>
+        <TimePicker
+          value={time}
+          onChange={setTime}
+          placeholder="HH:MM AM/PM"
+        />
+      </div>
+    </div>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
+  // We use useLocation just to trigger re-renders if needed, but Routes handles it
+
+  return (
+    <Routes>
+      <Route path="/" element={<Showcase />} />
+      <Route path="/simple" element={<SimpleForm />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   )
 }
 

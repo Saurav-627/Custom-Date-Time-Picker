@@ -18,6 +18,8 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
     const minRef = useRef(null);
     const secRef = useRef(null);
     const ampmRef = useRef(null);
+    const scrollTimeoutRef = useRef(null);
+    const openTimeRef = useRef(0);
 
     const hoursArr = use12h ? Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')) : Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
     const minutesArr = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
@@ -35,20 +37,27 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
     // Handle initial scroll on mobile open
     useEffect(() => {
         if (isOpen && isMobile) {
-            // Use current value or default if empty
-            const current = tempValue || (use12h ? '12:00 AM' : '12:00');
+            let fallbackTime = "01:00";
+            if (showSeconds) fallbackTime += ":00";
+            if (use12h) fallbackTime += " AM";
+
+            const current = tempValue || fallbackTime;
             const fullTimeParts = current.split(' ');
             const parts = fullTimeParts[0].split(':');
             const currentAmPm = fullTimeParts[1] || 'AM';
 
-            const timer = setTimeout(() => {
+            const syncScrolls = () => {
                 const hIdx = hoursArr.indexOf(parts[0]);
-                if (hourRef.current && hIdx !== -1) hourRef.current.scrollTo({ top: hIdx * 36, behavior: 'auto' });
-                if (minRef.current) minRef.current.scrollTo({ top: parseInt(parts[1] || 0) * 36, behavior: 'auto' });
-                if (secRef.current && showSeconds) secRef.current.scrollTo({ top: parseInt(parts[2] || 0) * 36, behavior: 'auto' });
-                if (ampmRef.current && use12h) ampmRef.current.scrollTo({ top: ampmArr.indexOf(currentAmPm) * 36, behavior: 'auto' });
-            }, 50);
-            return () => clearTimeout(timer);
+                if (hourRef.current && hIdx !== -1) hourRef.current.scrollTop = hIdx * 32;
+                if (minRef.current) minRef.current.scrollTop = parseInt(parts[1] || 0) * 32;
+                if (secRef.current && showSeconds) secRef.current.scrollTop = parseInt(parts[2] || 0) * 32;
+                if (ampmRef.current && use12h) ampmRef.current.scrollTop = ampmArr.indexOf(currentAmPm) * 32;
+            };
+
+            syncScrolls();
+            const t1 = setTimeout(syncScrolls, 50);
+            const t2 = setTimeout(syncScrolls, 300);
+            return () => { clearTimeout(t1); clearTimeout(t2); };
         }
     }, [isOpen, isMobile]);
 
@@ -60,17 +69,28 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
             const currentAmPm = fullTimeParts[1] || 'AM';
 
             const hIdx = hoursArr.indexOf(parts[0]);
-            if (hourRef.current && hIdx !== -1) hourRef.current.scrollTo({ top: hIdx * 36, behavior: 'smooth' });
-            if (minRef.current) minRef.current.scrollTo({ top: parseInt(parts[1] || 0) * 36, behavior: 'smooth' });
-            if (secRef.current && showSeconds) secRef.current.scrollTo({ top: parseInt(parts[2] || 0) * 36, behavior: 'smooth' });
-            if (ampmRef.current && use12h) ampmRef.current.scrollTo({ top: ampmArr.indexOf(currentAmPm) * 36, behavior: 'smooth' });
+            if (hourRef.current && Math.abs(hourRef.current.scrollTop - hIdx * 32) > 5) {
+                hourRef.current.scrollTo({ top: hIdx * 32, behavior: 'smooth' });
+            }
+            if (minRef.current && Math.abs(minRef.current.scrollTop - parseInt(parts[1] || 0) * 32) > 5) {
+                minRef.current.scrollTo({ top: parseInt(parts[1] || 0) * 32, behavior: 'smooth' });
+            }
+            if (secRef.current && showSeconds && Math.abs(secRef.current.scrollTop - parseInt(parts[2] || 0) * 32) > 5) {
+                secRef.current.scrollTo({ top: parseInt(parts[2] || 0) * 32, behavior: 'smooth' });
+            }
+            if (ampmRef.current && use12h && Math.abs(ampmRef.current.scrollTop - ampmArr.indexOf(currentAmPm) * 32) > 5) {
+                ampmRef.current.scrollTo({ top: ampmArr.indexOf(currentAmPm) * 32, behavior: 'smooth' });
+            }
         }
     }, [tempValue]);
 
     const toggleOpen = () => {
         if (!isOpen) {
-            // Set draft to current input or pick reasonable default ONLY for the picker UI
-            setTempValue(inputValue || (use12h ? '12:00 AM' : '12:00'));
+            let defaultTime = "01:00";
+            if (showSeconds) defaultTime += ":00";
+            if (use12h) defaultTime += " AM";
+            setTempValue(inputValue || defaultTime);
+            openTimeRef.current = Date.now();
         }
         setIsOpen(!isOpen);
     };
@@ -115,8 +135,24 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Prevent body scroll when mobile picker is open
+    useEffect(() => {
+        if (isMobile && isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, isMobile]);
+
     const renderDesktop = () => {
-        const current = tempValue || (use12h ? '12:00 AM' : '12:00');
+        let fallbackTime = "01:00";
+        if (showSeconds) fallbackTime += ":00";
+        if (use12h) fallbackTime += " AM";
+
+        const current = tempValue || fallbackTime;
         const fullTimeParts = current.split(' ');
         const timeParts = fullTimeParts[0].split(':');
         const currentAmPm = fullTimeParts[1] || 'AM';
@@ -186,7 +222,12 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
     };
 
     const renderMobileGrid = () => {
-        const fullTimeParts = (tempValue || (use12h ? '12:00 AM' : '12:00')).split(' ');
+        let fallbackTime = "01:00";
+        if (showSeconds) fallbackTime += ":00";
+        if (use12h) fallbackTime += " AM";
+
+        const current = tempValue || fallbackTime;
+        const fullTimeParts = current.split(' ');
         const parts = fullTimeParts[0].split(':');
         const currentAmPm = fullTimeParts[1] || 'AM';
 
@@ -205,21 +246,39 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
             handleTimeSelect(timeStr);
         };
 
+        const handleWheelScroll = (e, type, index, arr) => {
+            if (Date.now() - openTimeRef.current < 500) return; // Prevent initial layout misfiring updates
+
+            const top = e.target.scrollTop;
+            const activeIdx = Math.round(top / 32);
+            if (activeIdx >= 0 && activeIdx < arr.length) {
+                const newVal = arr[activeIdx];
+                if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+                scrollTimeoutRef.current = setTimeout(() => {
+                    if (type === 'part') {
+                        if (parts[index] !== newVal) updatePart(index, newVal);
+                    } else if (type === 'ampm') {
+                        if (currentAmPm !== newVal) updateAmPm(newVal);
+                    }
+                }, 150);
+            }
+        };
+
         return (
             <div className="mobile-scroll-picker">
                 <div className="mobile-header">
                     <h3>Select Time</h3>
                     <span className="selected-preview">{tempValue || '--:--'}</span>
                 </div>
-                <div className="scroll-columns">
-                    <div className="scroll-col hour-col" ref={hourRef}>
+                <div className="scroll-columns" style={{ touchAction: 'pan-y' }}>
+                    <div className="scroll-col hour-col" ref={hourRef} onScroll={(e) => handleWheelScroll(e, 'part', 0, hoursArr)}>
                         {hoursArr.map(h => (
                             <div key={h} className={`scroll-item ${parts[0] === h ? 'selected' : ''}`} onClick={() => updatePart(0, h)}>
                                 {h}
                             </div>
                         ))}
                     </div>
-                    <div className="scroll-col min-col" ref={minRef}>
+                    <div className="scroll-col min-col" ref={minRef} onScroll={(e) => handleWheelScroll(e, 'part', 1, minutesArr)}>
                         {minutesArr.map(m => (
                             <div key={m} className={`scroll-item ${parts[1] === m ? 'selected' : ''}`} onClick={() => updatePart(1, m)}>
                                 {m}
@@ -227,7 +286,7 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
                         ))}
                     </div>
                     {showSeconds && (
-                        <div className="scroll-col sec-col" ref={secRef}>
+                        <div className="scroll-col sec-col" ref={secRef} onScroll={(e) => handleWheelScroll(e, 'part', 2, secondsArr)}>
                             {secondsArr.map(s => (
                                 <div key={s} className={`scroll-item ${parts[2] === s ? 'selected' : ''}`} onClick={() => updatePart(2, s)}>
                                     {s}
@@ -236,7 +295,7 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
                         </div>
                     )}
                     {use12h && (
-                        <div className="scroll-col ampm-col" ref={ampmRef}>
+                        <div className="scroll-col ampm-col" ref={ampmRef} onScroll={(e) => handleWheelScroll(e, 'ampm', null, ampmArr)}>
                             {ampmArr.map(p => (
                                 <div key={p} className={`scroll-item ${currentAmPm === p ? 'selected' : ''}`} onClick={() => updateAmPm(p)}>
                                     {p}
