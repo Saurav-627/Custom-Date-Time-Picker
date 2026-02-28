@@ -59,22 +59,7 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         }
     }, [isOpen, isMobile]);
 
-    // Update scrolls when tempDate changes via wheel clicks (Smooth)
-    useEffect(() => {
-        if (isOpen && isMobile) {
-            const yIdx = years.indexOf(tempDate.getFullYear());
-            if (yearRef.current && Math.abs(yearRef.current.scrollTop - yIdx * 32) > 5) {
-                yearRef.current.scrollTo({ top: yIdx * 32, behavior: 'smooth' });
-            }
-            if (monthRef.current && Math.abs(monthRef.current.scrollTop - tempDate.getMonth() * 32) > 5) {
-                monthRef.current.scrollTo({ top: tempDate.getMonth() * 32, behavior: 'smooth' });
-            }
-            const dIdx = tempDate.getDate() - 1;
-            if (dayRef.current && Math.abs(dayRef.current.scrollTop - dIdx * 32) > 5) {
-                dayRef.current.scrollTo({ top: dIdx * 32, behavior: 'smooth' });
-            }
-        }
-    }, [tempDate]);
+    // Auto-scroll effect removed to allow zero-friction iOS native momentum scrolling
 
     const toggleOpen = () => {
         if (!isOpen) {
@@ -244,10 +229,26 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     const renderMobilePicker = () => {
         const updateDate = (part, val) => {
             const d = new Date(tempDate);
+            let targetDay = d.getDate();
+
             if (part === 'year') d.setFullYear(val);
             if (part === 'month') d.setMonth(val);
-            if (part === 'day') d.setDate(val);
+            if (part === 'day') { d.setDate(val); targetDay = val; }
+
+            const maxDays = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            if (targetDay > maxDays) d.setDate(maxDays);
+
             setTempDate(d);
+
+            // Programmatically scroll the physically clicked part to center
+            if (part === 'year' && yearRef.current) yearRef.current.scrollTo({ top: years.indexOf(val) * 32, behavior: 'smooth' });
+            if (part === 'month' && monthRef.current) monthRef.current.scrollTo({ top: val * 32, behavior: 'smooth' });
+            if (part === 'day' && dayRef.current) dayRef.current.scrollTo({ top: (val - 1) * 32, behavior: 'smooth' });
+
+            // If the user's action caused the day to get clamped (e.g. month to Feb, but day was 31), scroll the day wheel manually down to 28
+            if (part !== 'day' && targetDay > maxDays && dayRef.current) {
+                dayRef.current.scrollTo({ top: (maxDays - 1) * 32, behavior: 'smooth' });
+            }
         };
 
         const handleWheelScroll = (e, part, arr) => {
@@ -275,6 +276,11 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
 
                     if (tempDate.getTime() !== newDate.getTime()) {
                         setTempDate(newDate);
+                    }
+
+                    // Specific handler for constraints (scrolled year/month and day gets squished from 31 to 28 limit)
+                    if (part !== 'day' && tempDate.getDate() > maxDays && dayRef.current) {
+                        dayRef.current.scrollTo({ top: (maxDays - 1) * 32, behavior: 'smooth' });
                     }
                 }, 150);
             }

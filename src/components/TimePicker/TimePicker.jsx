@@ -61,28 +61,7 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
         }
     }, [isOpen, isMobile]);
 
-    // Update scrolls when tempValue changes via wheel clicks (Smooth)
-    useEffect(() => {
-        if (isOpen && isMobile && tempValue) {
-            const fullTimeParts = tempValue.split(' ');
-            const parts = fullTimeParts[0].split(':');
-            const currentAmPm = fullTimeParts[1] || 'AM';
-
-            const hIdx = hoursArr.indexOf(parts[0]);
-            if (hourRef.current && Math.abs(hourRef.current.scrollTop - hIdx * 32) > 5) {
-                hourRef.current.scrollTo({ top: hIdx * 32, behavior: 'smooth' });
-            }
-            if (minRef.current && Math.abs(minRef.current.scrollTop - parseInt(parts[1] || 0) * 32) > 5) {
-                minRef.current.scrollTo({ top: parseInt(parts[1] || 0) * 32, behavior: 'smooth' });
-            }
-            if (secRef.current && showSeconds && Math.abs(secRef.current.scrollTop - parseInt(parts[2] || 0) * 32) > 5) {
-                secRef.current.scrollTo({ top: parseInt(parts[2] || 0) * 32, behavior: 'smooth' });
-            }
-            if (ampmRef.current && use12h && Math.abs(ampmRef.current.scrollTop - ampmArr.indexOf(currentAmPm) * 32) > 5) {
-                ampmRef.current.scrollTo({ top: ampmArr.indexOf(currentAmPm) * 32, behavior: 'smooth' });
-            }
-        }
-    }, [tempValue]);
+    // Auto-scroll effect removed to allow zero-friction iOS native momentum scrolling
 
     const toggleOpen = () => {
         if (!isOpen) {
@@ -238,12 +217,19 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
             let timeStr = newParts.slice(0, showSeconds ? 3 : 2).join(':');
             if (use12h) timeStr += ` ${currentAmPm}`;
             handleTimeSelect(timeStr);
+
+            // Programmatically scroll the wheel if the user clicked the item (instead of scrolling to it)
+            if (index === 0 && hourRef.current) hourRef.current.scrollTo({ top: hoursArr.indexOf(val) * 32, behavior: 'smooth' });
+            if (index === 1 && minRef.current) minRef.current.scrollTo({ top: minutesArr.indexOf(val) * 32, behavior: 'smooth' });
+            if (index === 2 && secRef.current) secRef.current.scrollTo({ top: secondsArr.indexOf(val) * 32, behavior: 'smooth' });
         };
 
         const updateAmPm = (val) => {
             let timeStr = parts.slice(0, showSeconds ? 3 : 2).join(':');
             if (use12h) timeStr += ` ${val}`;
             handleTimeSelect(timeStr);
+
+            if (ampmRef.current) ampmRef.current.scrollTo({ top: ampmArr.indexOf(val) * 32, behavior: 'smooth' });
         };
 
         const handleWheelScroll = (e, type, index, arr) => {
