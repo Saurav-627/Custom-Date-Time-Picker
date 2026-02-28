@@ -144,7 +144,7 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
                     <div className="time-col">
                         <span className="col-label">Min</span>
                         <div className="time-scroll">
-                            {['00', '15', '30', '45'].map(m => (
+                            {minutesArr.map(m => (
                                 <button key={m} className={`time-btn ${timeParts[1] === m ? 'active' : ''}`} onClick={() => update(undefined, m)}>
                                     {m}
                                 </button>
@@ -155,7 +155,7 @@ const TimePicker = ({ value, onChange, placeholder = "HH/MM AM/PM", showSeconds 
                         <div className="time-col">
                             <span className="col-label">Sec</span>
                             <div className="time-scroll">
-                                {['00', '15', '30', '45'].map(s => (
+                                {secondsArr.map(s => (
                                     <button key={s} className={`time-btn ${timeParts[2] === s ? 'active' : ''}`} onClick={() => update(undefined, undefined, s)}>
                                         {s}
                                     </button>

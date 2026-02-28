@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
+  /* Default: Dark Theme */
   --primary: #3b82f6;
   --primary-glow: rgba(59, 130, 246, 0.4);
   --secondary: #6366f1;
@@ -11,8 +12,25 @@
   --border: rgba(255, 255, 255, 0.1);
   --border-active: rgba(59, 130, 246, 0.5);
   --glass: rgba(15, 23, 42, 0.6);
+  --hover-overlay: rgba(255, 255, 255, 0.1);
+  --shadow-heavy: rgba(0, 0, 0, 0.5);
+  --mobile-sheet-bg: rgba(15, 23, 42, 0.98);
   --radius: 12px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f1f5f9;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text: #0f172a;
+    --text-dim: #64748b;
+    --border: rgba(0, 0, 0, 0.1);
+    --glass: rgba(255, 255, 255, 0.8);
+    --hover-overlay: rgba(0, 0, 0, 0.05);
+    --shadow-heavy: rgba(0, 0, 0, 0.15);
+    --mobile-sheet-bg: rgba(255, 255, 255, 0.95);
+  }
 }
 
 * {
@@ -98,8 +116,8 @@ input {
   z-index: 1000;
   margin-top: 8px;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  background: #1e293b !important;
+  box-shadow: 0 10px 40px var(--shadow-heavy);
+  background: var(--card-bg) !important;
 }
 
 /* Mobile: Always Fixed at Bottom, no gaps */
@@ -115,8 +133,8 @@ input {
   /* Shorter for better UX */
   width: 100% !important;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
-  background: rgba(15, 23, 42, 0.98) !important;
+  box-shadow: 0 -8px 32px var(--shadow-heavy);
+  background: var(--mobile-sheet-bg) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }

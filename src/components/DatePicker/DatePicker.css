@@ -31,13 +31,14 @@
 }
 
 .select-cell:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: var(--primary-glow);
     color: var(--primary);
 }
 
 .select-cell.active {
     background: var(--primary);
     color: white;
+    /* Active states stay white for contrast against primary color */
 }
 
 /* Desktop Calendar Header & Grid */
@@ -67,7 +68,7 @@
 }
 
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--hover-overlay);
     color: var(--primary);
 }
 
@@ -97,7 +98,7 @@
 }
 
 .calendar-day-cell:hover {
-    background: rgba(59, 130, 246, 0.2);
+    background: var(--primary-glow);
     color: var(--primary);
 }
 
@@ -139,5 +140,7 @@
     margin-left: 16px;
     margin-right: 16px;
     font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px var(--shadow-heavy);
+    color: white;
+    /* Ensure text is white regardless of theme */
 }

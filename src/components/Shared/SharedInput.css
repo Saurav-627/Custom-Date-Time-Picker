@@ -13,7 +13,7 @@
 .input-container.focused {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-glow);
-    background: rgba(30, 41, 59, 1);
+    background: var(--card-bg);
 }
 
 .input-icon-wrapper {
@@ -55,7 +55,7 @@
 
 .clear-btn:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--hover-overlay);
     color: #ef4444;
 }
 
