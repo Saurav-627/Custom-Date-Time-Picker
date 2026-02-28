@@ -38,6 +38,15 @@
     /* Stop iOS Safari zoom on focus */
     width: 100%;
     font-weight: 500;
+    padding: 0;
+    margin: 0;
+    line-height: 1.2;
+    /* Fixes abnormally tall native cursor on iPhone */
+}
+
+.shared-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .shared-input::placeholder {

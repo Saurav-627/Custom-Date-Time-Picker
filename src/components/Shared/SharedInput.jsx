@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Clock, X } from 'lucide-react';
+import { useMobile } from '../../hooks/useMediaQuery';
 import './SharedInput.css';
 
 const SharedInput = ({
@@ -14,6 +15,7 @@ const SharedInput = ({
     onFocus: externalOnFocus,
     onBlur: externalOnBlur
 }) => {
+    const isMobile = useMobile();
     const [isFocused, setIsFocused] = useState(false);
     const [dropDirection, setDropDirection] = useState('down');
     const inputRef = useRef(null);
@@ -161,6 +163,7 @@ const SharedInput = ({
                 className="shared-input"
                 value={value}
                 onChange={handleChange}
+                readOnly={isMobile}
                 onFocus={(e) => {
                     setIsFocused(true);
                     checkPosition();
@@ -170,7 +173,13 @@ const SharedInput = ({
                     setIsFocused(false);
                     if (externalOnBlur) externalOnBlur(e);
                 }}
-                onClick={(e) => { e.stopPropagation(); }}
+                onClick={(e) => {
+                    if (isMobile) {
+                        handleToggle(e);
+                    } else {
+                        e.stopPropagation();
+                    }
+                }}
             />
 
             {value && onClear && (

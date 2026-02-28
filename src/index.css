@@ -146,6 +146,13 @@ input {
   -webkit-backdrop-filter: blur(20px);
 }
 
+/* Hard-hide Desktop specific dropdowns on mobile to prevent ghost borders / layout bleeding */
+@media (max-width: 768px) {
+  .picker-dropdown.desktop {
+    display: none !important;
+  }
+}
+
 .mobile-backdrop {
   position: fixed;
   top: 0;
