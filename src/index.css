@@ -32,7 +32,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
 }
@@ -69,13 +69,16 @@ input {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
@@ -84,6 +87,130 @@ input {
 .animate-scale {
   transition: transform 0.2s ease;
 }
+
 .animate-scale:active {
   transform: scale(0.95);
+}
+
+/* Global Picker Styles for Date/Time */
+.picker-dropdown {
+  position: absolute;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: #1e293b !important;
+}
+
+/* Mobile: Always Fixed at Bottom, no gaps */
+.picker-dropdown.mobile {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  border-radius: 24px 24px 0 0 !important;
+  margin: 0 !important;
+  max-height: 65vh !important;
+  /* Shorter for better UX */
+  width: 100% !important;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.98) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.mobile-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+/* Desktop Smart Drop */
+.input-container.drop-up+.picker-dropdown {
+  top: auto !important;
+  bottom: 100% !important;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.input-container.drop-down+.picker-dropdown {
+  top: 100% !important;
+  bottom: auto !important;
+}
+
+/* Common Scroll Columns for Mobile Picker */
+.scroll-columns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 140px;
+  /* Thinner */
+  overflow: hidden;
+  position: relative;
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* Selection Highlight Bar */
+.scroll-columns::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 36px;
+  background: rgba(59, 130, 246, 0.1);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.scroll-col {
+  flex: 1;
+  max-width: 70px;
+  /* Narrower columns */
+  overflow-y: scroll;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-type: y mandatory;
+  padding: 52px 0;
+  /* Updated for 140px total height and 36px items */
+  position: relative;
+  z-index: 2;
+}
+
+.scroll-col::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-item {
+  height: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  transition: var(--transition);
+  cursor: pointer;
+  width: 100%;
+  scroll-snap-align: center;
+}
+
+.scroll-item.selected {
+  font-weight: 700;
+  color: var(--primary);
+  opacity: 1;
+  font-size: 1.1rem;
 }

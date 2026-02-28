@@ -7,6 +7,7 @@
     border: 1px solid var(--border);
     min-width: 250px;
     position: relative;
+    cursor: pointer;
 }
 
 .input-container.focused {

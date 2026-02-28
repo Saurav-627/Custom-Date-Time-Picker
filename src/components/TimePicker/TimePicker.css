@@ -4,8 +4,13 @@
 }
 
 .desktop-time-picker {
-    width: 280px;
-    padding: 16px;
+    width: 260px;
+    padding: 12px;
+    transition: width 0.3s ease;
+}
+
+.desktop-time-picker.with-seconds {
+    width: 340px;
 }
 
 .time-select-grid {
@@ -51,18 +56,22 @@
     color: white;
 }
 
-/* Mobile Clock */
-.mobile-time {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 24px 24px 0 0;
-    padding: 24px;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+/* Desktop Footer for Confirmation */
+.desktop-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
 }
 
-.mobile-clock-container h3 {
-    text-align: center;
-    margin-bottom: 24px;
+.confirm-btn.small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
 }
