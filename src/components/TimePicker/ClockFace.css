@@ -1,0 +1,86 @@
+.clock-face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.clock-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    display: flex;
+    gap: 8px;
+    color: var(--text-dim);
+}
+
+.clock-display span {
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: var(--transition);
+}
+
+.clock-display span.active {
+    color: var(--primary);
+    background: var(--primary-glow);
+}
+
+.clock-dial {
+    width: 260px;
+    height: 260px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.center-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    z-index: 10;
+}
+
+.clock-hand {
+    width: 2px;
+    height: 110px;
+    background: var(--primary);
+    position: absolute;
+    bottom: 50%;
+    transform-origin: bottom center;
+    z-index: 5;
+}
+
+.clock-number {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-dim);
+    transition: var(--transition);
+    z-index: 15;
+}
+
+.clock-number:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+
+.clock-number.active {
+    background: var(--primary);
+    color: white;
+}
+
+.clock-actions {
+    width: 100%;
+}

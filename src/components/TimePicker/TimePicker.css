@@ -1,0 +1,68 @@
+.timepicker-wrapper {
+    position: relative;
+    width: fit-content;
+}
+
+.desktop-time-picker {
+    width: 280px;
+    padding: 16px;
+}
+
+.time-select-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.time-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.col-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.time-scroll {
+    height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.time-btn {
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.time-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.time-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Mobile Clock */
+.mobile-time {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-clock-container h3 {
+    text-align: center;
+    margin-bottom: 24px;
+}
