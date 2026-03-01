@@ -1,0 +1,209 @@
+/* date-time-picker-custom theme variables and base styles */
+:root {
+    /* Default: Dark Theme */
+    --primary: #3b82f6;
+    --primary-glow: rgba(59, 130, 246, 0.4);
+    --secondary: #6366f1;
+    --bg: #0f172a;
+    --card-bg: rgba(30, 41, 59, 1);
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-active: rgba(59, 130, 246, 0.5);
+    --glass: rgba(15, 23, 42, 0.6);
+    --hover-overlay: rgba(255, 255, 255, 0.1);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    --mobile-sheet-bg: rgba(15, 23, 42, 1);
+    --radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f1f5f9;
+        --card-bg: rgba(255, 255, 255, 1);
+        --text: #0f172a;
+        --text-dim: #64748b;
+        --border: rgba(0, 0, 0, 0.1);
+        --glass: rgba(255, 255, 255, 0.8);
+        --hover-overlay: rgba(0, 0, 0, 0.05);
+        --shadow-heavy: rgba(0, 0, 0, 0.15);
+        --mobile-sheet-bg: rgba(255, 255, 255, 1);
+    }
+}
+
+/* Glassmorphism card */
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Base Utility Classes */
+.animate-scale {
+    transition: transform 0.2s ease;
+}
+
+.animate-scale:active {
+    transform: scale(0.95);
+}
+
+/* Global Picker Styles for Date/Time */
+.picker-dropdown {
+    position: absolute;
+    z-index: 1000;
+    margin-top: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px var(--shadow-heavy);
+    background: var(--card-bg) !important;
+}
+
+/* Mobile: Always Fixed at Bottom, no gaps */
+.picker-dropdown.mobile {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin: 0 !important;
+    max-height: 48vh !important;
+    width: 100% !important;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 32px var(--shadow-heavy);
+    background: var(--mobile-sheet-bg) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Hard-hide Desktop specific dropdowns on mobile */
+@media (max-width: 768px) {
+    .picker-dropdown.desktop {
+        display: none !important;
+    }
+}
+
+.mobile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+}
+
+/* Desktop Smart Drop */
+.input-container.drop-up+.picker-dropdown {
+    top: auto !important;
+    bottom: 100% !important;
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+
+.input-container.drop-down+.picker-dropdown {
+    top: 100% !important;
+    bottom: auto !important;
+}
+
+/* Common Scroll Columns for Mobile Picker */
+.scroll-columns {
+    display: flex;
+    justify-content: center;
+    height: 120px;
+    min-height: 120px;
+    max-height: 120px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Selection Highlight Bar */
+.scroll-columns::after {
+    content: '';
+    position: absolute;
+    top: 44px;
+    left: 5%;
+    width: 90%;
+    height: 32px;
+    background: var(--hover-overlay);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    pointer-events: none;
+    border-radius: 8px;
+}
+
+.scroll-col {
+    flex: 1;
+    max-width: 70px;
+    height: 100%;
+    max-height: 120px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scroll-snap-type: y mandatory;
+    padding: 0;
+    overscroll-behavior: none;
+    position: relative;
+    z-index: 2;
+}
+
+.scroll-col::before,
+.scroll-col::after {
+    content: '';
+    display: block;
+    min-height: 44px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.scroll-col::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-item {
+    height: 32px;
+    min-height: 32px;
+    line-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--text-dim);
+    transition: var(--transition);
+    cursor: pointer;
+    width: 100%;
+    scroll-snap-align: center;
+    margin: 0;
+}
+
+.scroll-item.selected {
+    font-weight: 700;
+    color: var(--primary);
+    opacity: 1;
+    font-size: 1.15rem;
+}
