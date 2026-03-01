@@ -1,4 +1,43 @@
 /* date-time-picker-custom theme variables and base styles */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Component-Scoped CSS Reset */
+.datepicker-wrapper,
+.datepicker-wrapper *,
+.timepicker-wrapper,
+.timepicker-wrapper * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+}
+
+.datepicker-wrapper button,
+.timepicker-wrapper button {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    color: inherit;
+}
+
+.datepicker-wrapper input,
+.timepicker-wrapper input {
+    outline: none;
+    border: none;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none;
+    color: inherit;
+}
+
 :root {
     /* Default: Dark Theme */
     --primary: #3b82f6;
@@ -206,4 +245,44 @@
     color: var(--primary);
     opacity: 1;
     font-size: 1.15rem;
+}
+
+/* Mobile Header & Confirm (Refined for Space) */
+.mobile-scroll-picker {
+    padding: 16px 8px;
+}
+
+.mobile-header {
+    text-align: center;
+    margin-bottom: 12px;
+    padding: 0 16px;
+}
+
+.mobile-header h3 {
+    margin-bottom: 2px;
+    font-size: 1.2rem;
+}
+
+.selected-preview {
+    font-size: 0.9rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.confirm-btn {
+    margin-top: 16px;
+    background-color: var(--primary) !important;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px var(--shadow-heavy);
+    color: white !important;
+    /* Ensure text is white regardless of theme */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
