@@ -6,7 +6,7 @@
   --primary-glow: rgba(59, 130, 246, 0.4);
   --secondary: #6366f1;
   --bg: #0f172a;
-  --card-bg: rgba(30, 41, 59, 0.7);
+  --card-bg: rgba(30, 41, 59, 1);
   --text: #f8fafc;
   --text-dim: #94a3b8;
   --border: rgba(255, 255, 255, 0.1);
@@ -14,7 +14,7 @@
   --glass: rgba(15, 23, 42, 0.6);
   --hover-overlay: rgba(255, 255, 255, 0.1);
   --shadow-heavy: rgba(0, 0, 0, 0.5);
-  --mobile-sheet-bg: rgba(15, 23, 42, 0.98);
+  --mobile-sheet-bg: rgba(15, 23, 42, 1);
   --radius: 12px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -22,14 +22,14 @@
 @media (prefers-color-scheme: light) {
   :root {
     --bg: #f1f5f9;
-    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-bg: rgba(255, 255, 255, 1);
     --text: #0f172a;
     --text-dim: #64748b;
     --border: rgba(0, 0, 0, 0.1);
     --glass: rgba(255, 255, 255, 0.8);
     --hover-overlay: rgba(0, 0, 0, 0.05);
     --shadow-heavy: rgba(0, 0, 0, 0.15);
-    --mobile-sheet-bg: rgba(255, 255, 255, 0.95);
+    --mobile-sheet-bg: rgba(255, 255, 255, 1);
   }
 }
 
@@ -84,8 +84,8 @@ input {
 /* Glassmorphism card */
 .glass-card {
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* backdrop-filter: blur(12px); */
+  /* -webkit-backdrop-filter: blur(12px); */
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
@@ -221,7 +221,8 @@ input {
   align-items: center;
   scroll-snap-type: y mandatory;
   padding: 0;
-  overscroll-behavior: none; /* Kill iOS rubber-banding */
+  overscroll-behavior: none;
+  /* Kill iOS rubber-banding */
   position: relative;
   z-index: 2;
 }
@@ -230,7 +231,8 @@ input {
 .scroll-col::after {
   content: '';
   display: block;
-  min-height: 44px; /* Exact replacement for the 44px padding bounds */
+  min-height: 44px;
+  /* Exact replacement for the 44px padding bounds */
   flex-shrink: 0;
   width: 100%;
 }
