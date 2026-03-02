@@ -121,7 +121,7 @@ input {
 /* Global Picker Styles for Date/Time */
 .picker-dropdown {
   position: absolute;
-  z-index: 1000;
+  z-index: 999999;
   margin-top: 8px;
   overflow: hidden;
   box-shadow: 0 10px 40px var(--shadow-heavy);
@@ -161,7 +161,7 @@ input {
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 999;
+  z-index: 999998;
 }
 
 /* Desktop Smart Drop */

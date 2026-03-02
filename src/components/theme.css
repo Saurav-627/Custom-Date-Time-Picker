@@ -5,7 +5,11 @@
 .datepicker-wrapper,
 .datepicker-wrapper *,
 .timepicker-wrapper,
-.timepicker-wrapper * {
+.timepicker-wrapper *,
+.datepicker-mobile-portal,
+.datepicker-mobile-portal *,
+.timepicker-mobile-portal,
+.timepicker-mobile-portal * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -38,8 +42,12 @@
     color: inherit;
 }
 
-:root {
-    /* Default: Dark Theme */
+/* Default: Dark Theme */
+:root,
+.datepicker-wrapper,
+.timepicker-wrapper,
+.datepicker-mobile-portal,
+.timepicker-mobile-portal {
     --primary: #3b82f6;
     --primary-glow: rgba(59, 130, 246, 0.4);
     --secondary: #6366f1;
@@ -57,8 +65,14 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* System Light Preference */
 @media (prefers-color-scheme: light) {
-    :root {
+
+    :root:not(.dark-theme),
+    .datepicker-wrapper:not(.dark-theme),
+    .timepicker-wrapper:not(.dark-theme),
+    .datepicker-mobile-portal:not(.dark-theme),
+    .timepicker-mobile-portal:not(.dark-theme) {
         --bg: #f1f5f9;
         --card-bg: rgba(255, 255, 255, 1);
         --text: #0f172a;
@@ -69,6 +83,38 @@
         --shadow-heavy: rgba(0, 0, 0, 0.15);
         --mobile-sheet-bg: rgba(255, 255, 255, 1);
     }
+}
+
+/* Manual Light Mode Prop Overlay */
+.datepicker-wrapper.light-theme,
+.timepicker-wrapper.light-theme,
+.datepicker-mobile-portal.light-theme,
+.timepicker-mobile-portal.light-theme {
+    --bg: #f1f5f9;
+    --card-bg: rgba(255, 255, 255, 1);
+    --text: #0f172a;
+    --text-dim: #64748b;
+    --border: rgba(0, 0, 0, 0.1);
+    --glass: rgba(255, 255, 255, 0.8);
+    --hover-overlay: rgba(0, 0, 0, 0.05);
+    --shadow-heavy: rgba(0, 0, 0, 0.15);
+    --mobile-sheet-bg: rgba(255, 255, 255, 1);
+}
+
+/* Manual Dark Mode Prop Overlay */
+.datepicker-wrapper.dark-theme,
+.timepicker-wrapper.dark-theme,
+.datepicker-mobile-portal.dark-theme,
+.timepicker-mobile-portal.dark-theme {
+    --bg: #0f172a;
+    --card-bg: rgba(30, 41, 59, 1);
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+    --glass: rgba(15, 23, 42, 0.6);
+    --hover-overlay: rgba(255, 255, 255, 0.1);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    --mobile-sheet-bg: rgba(15, 23, 42, 1);
 }
 
 /* Glassmorphism card */
@@ -109,7 +155,7 @@
 /* Global Picker Styles for Date/Time */
 .picker-dropdown {
     position: absolute;
-    z-index: 1000;
+    z-index: 999999;
     margin-top: 8px;
     overflow: hidden;
     box-shadow: 0 10px 40px var(--shadow-heavy);
@@ -149,7 +195,7 @@
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 999;
+    z-index: 999998;
 }
 
 /* Desktop Smart Drop */

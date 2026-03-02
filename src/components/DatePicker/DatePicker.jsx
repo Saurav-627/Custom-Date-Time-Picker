@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { format, parse, isValid, addMonths, subMonths, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isAfter, isBefore, isSameMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,11 +13,14 @@ const DatePicker = ({
     placeholder = "YYYY/MM/DD",
     name,
     onBlur,
-    disabled = false
+    disabled = false,
+    isDarkMode = undefined
 }) => {
     const isMobile = useMobile();
     const [isOpen, setIsOpen] = useState(false);
     const [view, setView] = useState('calendar');
+
+    const themeClass = isDarkMode === true ? 'dark-theme' : isDarkMode === false ? 'light-theme' : '';
 
     const safeParseDate = (val) => {
         if (!val) return null;
@@ -154,13 +158,17 @@ const DatePicker = ({
 
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // On mobile, the backdrop and confirm buttons handle closing. 
+            // The portal makes the dropdown live outside the wrapper, which would break this check.
+            if (isMobile) return;
+
             if (pickerRef.current && !pickerRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isMobile]);
 
     useEffect(() => {
         if (isMobile && isOpen) {
@@ -355,7 +363,7 @@ const DatePicker = ({
     };
 
     return (
-        <div className="datepicker-wrapper" ref={pickerRef}>
+        <div className={`datepicker-wrapper ${themeClass}`} ref={pickerRef}>
             <SharedInput
                 icon={CalendarIcon}
                 value={inputValue}
@@ -379,24 +387,37 @@ const DatePicker = ({
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {isMobile && (
+                        {isMobile ? createPortal(
+                            <div className={`datepicker-mobile-portal ${themeClass}`}>
+                                <motion.div
+                                    className="mobile-backdrop"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%', opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: '100%', opacity: 0 }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    className="picker-dropdown glass-card mobile"
+                                >
+                                    {renderMobilePicker()}
+                                </motion.div>
+                            </div>,
+                            document.body
+                        ) : (
                             <motion.div
-                                className="mobile-backdrop"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setIsOpen(false)}
-                            />
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: 20, opacity: 0 }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="picker-dropdown glass-card desktop"
+                            >
+                                {renderCalendar()}
+                            </motion.div>
                         )}
-                        <motion.div
-                            initial={{ y: isMobile ? '100%' : 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: isMobile ? '100%' : 20, opacity: 0 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className={`picker-dropdown glass-card ${isMobile ? 'mobile' : 'desktop'}`}
-                        >
-                            {isMobile ? renderMobilePicker() : renderCalendar()}
-                        </motion.div>
                     </>
                 )}
             </AnimatePresence>

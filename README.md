@@ -12,6 +12,7 @@ A professional, high-performance, and responsive React Date and Time picker libr
 - **📱 Dedicated Mobile UI**: 
   - **Scroll-Wheel Select**: Smooth, iOS-style wheel selects for Years, Months, Days, and Time.
   - **Touch Optimized**: Large tap targets and haptic-friendly scrolling.
+  - **React Portal Support (NEW)**: Renders via Portals to stay above all parents, even those with `transform` or `filter`.
 - **🖥️ Premium Desktop UI**: 
   - **Elegant Calendar**: Full-featured grid with quick navigation between months and years.
   - **Grid Time Select**: Fast and efficient grid selection for precision time setting.
@@ -20,7 +21,10 @@ A professional, high-performance, and responsive React Date and Time picker libr
   - **Drop-in Support**: Seamlessly integrates with **React Hook Form**, **Formik**, and **Yup**.
   - **Standard Formats**: Always returns standard strings (`YYYY-MM-DD` and `HH:mm`).
 - **🛡️ Submission Protection**: All internal buttons are typed as `type="button"` to prevent accidental parent form submissions.
-- **🎨 Glassmorphism Design**: Modern, sleek aesthetics with dark/light mode support and smooth micro-animations.
+- **🎨 Glassmorphism & Themes**: 
+  - **Manual Theme Control**: Toggle between Dark/Light modes regardless of system settings.
+  - **High Visibility**: High z-index (`999999`) ensures pickers always stay on top.
+  - **Modern Aesthetics**: Sleek glassmorphism with smooth micro-animations.
 
 ---
 
@@ -111,8 +115,9 @@ function MyForm() {
 | `value` | `string` | `""` | Date in `YYYY-MM-DD` format. |
 | `onChange` | `function` | `-` | Returns standard synthetic event. |
 | `placeholder` | `string` | `"YYYY/MM/DD"` | Placeholder for the input field. |
-| `disabled` | `boolean` | `false` | Disables all interactions. |
 | `name` | `string` | `-` | Name for form integration. |
+| `disabled` | `boolean` | `false` | Disables all interactions. |
+| `isDarkMode` | `boolean` | `undefined` | Forces Dark Mode (`true`) or Light Mode (`false`). Default follows system. |
 
 ### TimePicker
 | Prop | Type | Default | Description |
@@ -122,6 +127,7 @@ function MyForm() {
 | `use12h` | `boolean` | `true` | Show AM/PM selector. |
 | `showSeconds`| `boolean` | `false` | Show seconds selector. |
 | `disabled` | `boolean` | `false` | Disables all interactions. |
+| `isDarkMode` | `boolean` | `undefined` | Forces Dark Mode (`true`) or Light Mode (`false`). Default follows system. |
 
 ---
 

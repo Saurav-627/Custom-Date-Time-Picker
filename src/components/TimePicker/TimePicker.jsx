@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Clock as ClockIcon, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SharedInput from '../Shared/SharedInput';
@@ -13,10 +14,13 @@ const TimePicker = ({
     use12h = true,
     name,
     onBlur,
-    disabled = false
+    disabled = false,
+    isDarkMode = undefined
 }) => {
     const isMobile = useMobile();
     const [isOpen, setIsOpen] = useState(false);
+
+    const themeClass = isDarkMode === true ? 'dark-theme' : isDarkMode === false ? 'light-theme' : '';
 
     const convertTo24h = (timeStr) => {
         if (!timeStr) return '';
@@ -166,13 +170,17 @@ const TimePicker = ({
 
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // On mobile, the backdrop and confirm buttons handle closing. 
+            // The portal makes the dropdown live outside the wrapper, which would break this check.
+            if (isMobile) return;
+
             if (pickerRef.current && !pickerRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isMobile]);
 
     useEffect(() => {
         if (isMobile && isOpen) {
@@ -252,7 +260,7 @@ const TimePicker = ({
                 </div>
                 <div className="desktop-footer">
                     <button type="button" className="confirm-btn small" onClick={handleConfirm}>
-                        <Check size={16} style={{ marginRight: '6px' }} /> Done
+                        <Check size={16} style={{ marginRight: '6px', stroke: 'white', strokeWidth: '3px' }} /> Done
                     </button>
                 </div>
             </div>
@@ -354,7 +362,7 @@ const TimePicker = ({
     };
 
     return (
-        <div className="timepicker-wrapper" ref={pickerRef}>
+        <div className={`timepicker-wrapper ${themeClass}`} ref={pickerRef}>
             <SharedInput
                 icon={ClockIcon}
                 value={inputValue}
@@ -377,24 +385,37 @@ const TimePicker = ({
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {isMobile && (
+                        {isMobile ? createPortal(
+                            <div className={`timepicker-mobile-portal ${themeClass}`}>
+                                <motion.div
+                                    className="mobile-backdrop"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%', opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: '100%', opacity: 0 }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    className="picker-dropdown glass-card mobile"
+                                >
+                                    {renderMobileGrid()}
+                                </motion.div>
+                            </div>,
+                            document.body
+                        ) : (
                             <motion.div
-                                className="mobile-backdrop"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setIsOpen(false)}
-                            />
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: 20, opacity: 0 }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="picker-dropdown glass-card desktop"
+                            >
+                                {renderDesktop()}
+                            </motion.div>
                         )}
-                        <motion.div
-                            initial={{ y: isMobile ? '100%' : 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: isMobile ? '100%' : 20, opacity: 0 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className={`picker-dropdown glass-card ${isMobile ? 'mobile' : 'desktop'}`}
-                        >
-                            {isMobile ? renderMobileGrid() : renderDesktop()}
-                        </motion.div>
                     </>
                 )}
             </AnimatePresence>
