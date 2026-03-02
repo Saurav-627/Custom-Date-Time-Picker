@@ -6,13 +6,38 @@ import SharedInput from '../Shared/SharedInput';
 import { useMobile } from '../../hooks/useMediaQuery';
 import './DatePicker.css';
 
-const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
+const DatePicker = ({
+    value,
+    onChange,
+    placeholder = "YYYY/MM/DD",
+    name,
+    onBlur,
+    disabled = false
+}) => {
     const isMobile = useMobile();
     const [isOpen, setIsOpen] = useState(false);
     const [view, setView] = useState('calendar');
-    const [inputValue, setInputValue] = useState(value ? format(new Date(value), 'yyyy/MM/dd') : '');
-    const [tempDate, setTempDate] = useState(value ? new Date(value) : new Date());
-    const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
+
+    const safeParseDate = (val) => {
+        if (!val) return null;
+        if (val instanceof Date) return isValid(val) ? val : null;
+        if (typeof val === 'string') {
+            const clean = val.replace(/\//g, '-');
+            const parsed = parse(clean, 'yyyy-MM-dd', new Date());
+            if (isValid(parsed)) return parsed;
+            const parsedOld = parse(clean, 'yyyy/MM/dd', new Date());
+            if (isValid(parsedOld)) return parsedOld;
+        }
+        const d = new Date(val);
+        return isValid(d) ? d : null;
+    };
+
+    const [inputValue, setInputValue] = useState(() => {
+        const d = safeParseDate(value);
+        return d ? format(d, 'yyyy/MM/dd') : '';
+    });
+    const [tempDate, setTempDate] = useState(() => safeParseDate(value) || new Date());
+    const [currentMonth, setCurrentMonth] = useState(() => safeParseDate(value) || new Date());
     const [isFocused, setIsFocused] = useState(false);
     const pickerRef = useRef(null);
 
@@ -27,14 +52,14 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     const daysInMonth = new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, 0).getDate();
     const daysArr = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    // Sync input value with standard value if NOT focused OR closed
     useEffect(() => {
         if (!isFocused && !isOpen) {
-            if (value) {
-                const formatted = format(new Date(value), 'yyyy/MM/dd');
+            const dateObj = safeParseDate(value);
+            if (dateObj) {
+                const formatted = format(dateObj, 'yyyy/MM/dd');
                 setInputValue(formatted);
-                setCurrentMonth(new Date(value));
-                setTempDate(new Date(value));
+                setCurrentMonth(dateObj);
+                setTempDate(dateObj);
             } else {
                 setInputValue('');
                 setTempDate(new Date());
@@ -42,7 +67,6 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         }
     }, [value, isFocused, isOpen]);
 
-    // Handle initial scroll on mobile open
     useEffect(() => {
         if (isOpen && isMobile) {
             const syncScrolls = () => {
@@ -52,18 +76,17 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                 if (dayRef.current) dayRef.current.scrollTop = (tempDate.getDate() - 1) * 32;
             };
 
-            syncScrolls(); // Immediate sync
+            syncScrolls();
             const t1 = setTimeout(syncScrolls, 50);
-            const t2 = setTimeout(syncScrolls, 300); // Sync again after animation finishes
+            const t2 = setTimeout(syncScrolls, 300);
             return () => { clearTimeout(t1); clearTimeout(t2); };
         }
     }, [isOpen, isMobile]);
 
-    // Auto-scroll effect removed to allow zero-friction iOS native momentum scrolling
-
     const toggleOpen = () => {
+        if (disabled) return;
         if (!isOpen) {
-            const dateToUse = value ? new Date(value) : new Date();
+            const dateToUse = safeParseDate(value) || new Date();
             setTempDate(dateToUse);
             setCurrentMonth(dateToUse);
             setView('calendar');
@@ -72,8 +95,20 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         setIsOpen(!isOpen);
     };
 
+    const triggerChange = (date) => {
+        const formatted = date ? format(date, 'yyyy-MM-dd') : '';
+        if (onChange) {
+            onChange({
+                target: {
+                    name: name,
+                    value: formatted
+                }
+            });
+        }
+    };
+
     const handleConfirm = () => {
-        onChange(tempDate);
+        triggerChange(tempDate);
         setInputValue(format(tempDate, 'yyyy/MM/dd'));
         setIsOpen(false);
     };
@@ -81,13 +116,13 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
     const handleInputChange = (val) => {
         setInputValue(val);
         if (val === '') {
-            onChange(null);
+            triggerChange(null);
             setTempDate(new Date());
             return;
         }
         const parsedDate = parse(val, 'yyyy/MM/dd', new Date());
         if (isValid(parsedDate)) {
-            onChange(parsedDate);
+            triggerChange(parsedDate);
             setCurrentMonth(parsedDate);
             setTempDate(parsedDate);
         }
@@ -97,7 +132,7 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         if (isMobile) {
             setTempDate(date);
         } else {
-            onChange(date);
+            triggerChange(date);
             setInputValue(format(date, 'yyyy/MM/dd'));
             setIsOpen(false);
         }
@@ -127,7 +162,6 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Prevent body scroll when mobile picker is open
     useEffect(() => {
         if (isMobile && isOpen) {
             document.body.style.overflow = 'hidden';
@@ -148,6 +182,7 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                 <div className="grid-selector column-3">
                     {months.map((m, i) => (
                         <button
+                            type="button"
                             key={m}
                             className={`select-cell ${currentMonth.getMonth() === i ? 'active' : ''}`}
                             onClick={() => handleMonthSelect(i)}
@@ -166,13 +201,14 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         return (
             <div className="selector-view">
                 <div className="calendar-header">
-                    <button onClick={() => setCurrentMonth(subMonths(currentMonth, 12 * 12))}><ChevronLeft size={16} /></button>
+                    <button type="button" onClick={() => setCurrentMonth(subMonths(currentMonth, 12 * 12))}><ChevronLeft size={16} /></button>
                     <span>Select Year</span>
-                    <button onClick={() => setCurrentMonth(addMonths(currentMonth, 12 * 12))}><ChevronRight size={16} /></button>
+                    <button type="button" onClick={() => setCurrentMonth(addMonths(currentMonth, 12 * 12))}><ChevronRight size={16} /></button>
                 </div>
                 <div className="grid-selector column-3">
                     {yearsGrid.map(y => (
                         <button
+                            type='button'
                             key={y}
                             className={`select-cell ${currentMonth.getFullYear() === y ? 'active' : ''}`}
                             onClick={() => handleYearSelect(y)}
@@ -198,14 +234,14 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
         return (
             <div className="desktop-calendar">
                 <div className="calendar-header">
-                    <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+                    <button type="button" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                         <ChevronLeft size={18} />
                     </button>
                     <div className="header-nav">
                         <span className="nav-btn" onClick={() => setView('month')}>{format(currentMonth, 'MMMM')}</span>
                         <span className="nav-btn" onClick={() => setView('year')}>{format(currentMonth, 'yyyy')}</span>
                     </div>
-                    <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+                    <button type="button" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
                         <ChevronRight size={18} />
                     </button>
                 </div>
@@ -214,8 +250,9 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                     {emptyDays.map((_, i) => <div key={`empty-${i}`} />)}
                     {dateRange.map(date => (
                         <button
+                            type="button"
                             key={date.toString()}
-                            className={`calendar-day-cell ${isSameDay(date, new Date(value)) ? 'active' : ''} ${isSameDay(date, new Date()) ? 'today' : ''}`}
+                            className={`calendar-day-cell ${value && isSameDay(date, safeParseDate(value) || new Date(0)) ? 'active' : ''} ${isSameDay(date, new Date()) ? 'today' : ''}`}
                             onClick={() => handleDateSelect(date)}
                         >
                             {format(date, 'd')}
@@ -240,19 +277,17 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
 
             setTempDate(d);
 
-            // Programmatically scroll the physically clicked part to center
             if (part === 'year' && yearRef.current) yearRef.current.scrollTo({ top: years.indexOf(val) * 32, behavior: 'smooth' });
             if (part === 'month' && monthRef.current) monthRef.current.scrollTo({ top: val * 32, behavior: 'smooth' });
             if (part === 'day' && dayRef.current) dayRef.current.scrollTo({ top: (val - 1) * 32, behavior: 'smooth' });
 
-            // If the user's action caused the day to get clamped (e.g. month to Feb, but day was 31), scroll the day wheel manually down to 28
             if (part !== 'day' && targetDay > maxDays && dayRef.current) {
                 dayRef.current.scrollTo({ top: (maxDays - 1) * 32, behavior: 'smooth' });
             }
         };
 
         const handleWheelScroll = (e, part, arr) => {
-            if (Date.now() - openTimeRef.current < 500) return; // Ignore layout scroll events during opening animation
+            if (Date.now() - openTimeRef.current < 500) return;
 
             const top = e.target.scrollTop;
             const activeIdx = Math.round(top / 32);
@@ -278,7 +313,6 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                         setTempDate(newDate);
                     }
 
-                    // Specific handler for constraints (scrolled year/month and day gets squished from 31 to 28 limit)
                     if (part !== 'day' && tempDate.getDate() > maxDays && dayRef.current) {
                         dayRef.current.scrollTo({ top: (maxDays - 1) * 32, behavior: 'smooth' });
                     }
@@ -315,7 +349,7 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                         ))}
                     </div>
                 </div>
-                <button className="confirm-btn" onClick={handleConfirm}>Confirm</button>
+                <button type="button" className="confirm-btn" onClick={handleConfirm}>Confirm</button>
             </div>
         );
     };
@@ -329,12 +363,18 @@ const DatePicker = ({ value, onChange, placeholder = "YYYY/MM/DD" }) => {
                 onToggle={toggleOpen}
                 placeholder={placeholder}
                 mask="date"
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onFocus={() => {
+                    setIsFocused(true);
+                }}
+                onBlur={(e) => {
+                    setIsFocused(false);
+                    if (onBlur) onBlur({ target: { name, value: inputValue } });
+                }}
                 onClear={() => {
                     setInputValue('');
-                    onChange(null);
+                    triggerChange(null);
                 }}
+                disabled={disabled}
             />
             <AnimatePresence>
                 {isOpen && (

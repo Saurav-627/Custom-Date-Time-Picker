@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import DatePicker from './components/DatePicker/DatePicker'
-import TimePicker from './components/TimePicker/TimePicker'
+import { DatePicker, TimePicker } from './components'
 import './App.css'
 
 function Showcase() {
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [selectedTime, setSelectedTime] = useState('11:00 AM')
-  const [selectedTimeWithSeconds, setSelectedTimeWithSeconds] = useState('11:05:00 AM')
+  const [selectedDate, setSelectedDate] = useState('2024-03-02') // Use standard string now
+  const [selectedTime, setSelectedTime] = useState('11:00') // Use standard 24h string
+  const [selectedTimeWithSeconds, setSelectedTimeWithSeconds] = useState('11:05:00')
 
   return (
     <main className="app-container">
@@ -26,12 +25,12 @@ function Showcase() {
           <div className="picker-demo">
             <DatePicker
               value={selectedDate}
-              onChange={setSelectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
               placeholder="Select Date"
             />
             {selectedDate && (
               <div className="status-badge">
-                Selected: {selectedDate.toDateString()}
+                Selected: {selectedDate && (typeof selectedDate === 'string' ? selectedDate : selectedDate.toDateString())}
               </div>
             )}
           </div>
@@ -45,7 +44,7 @@ function Showcase() {
             <TimePicker
               use12h={true}
               value={selectedTime}
-              onChange={setSelectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
               placeholder="Standard Time"
             />
 
@@ -54,7 +53,7 @@ function Showcase() {
               use12h={true}
               showSeconds={true}
               value={selectedTimeWithSeconds}
-              onChange={setSelectedTimeWithSeconds}
+              onChange={(e) => setSelectedTimeWithSeconds(e.target.value)}
               placeholder="Precision Time"
             />
           </div>
@@ -87,7 +86,7 @@ function SimpleForm() {
         <label style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text)', marginLeft: '4px' }}>Date of Birth</label>
         <DatePicker
           value={date}
-          onChange={setDate}
+          onChange={(e) => setDate(e.target.value)}
           placeholder="YYYY/MM/DD"
         />
       </div>
@@ -96,7 +95,7 @@ function SimpleForm() {
         <label style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text)', marginLeft: '4px' }}>Meeting Time</label>
         <TimePicker
           value={time}
-          onChange={setTime}
+          onChange={(e) => setTime(e.target.value)}
           placeholder="HH:MM AM/PM"
         />
       </div>

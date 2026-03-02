@@ -13,7 +13,8 @@ const SharedInput = ({
     onClear,
     mask,
     onFocus: externalOnFocus,
-    onBlur: externalOnBlur
+    onBlur: externalOnBlur,
+    disabled = false
 }) => {
     const isMobile = useMobile();
     const [isFocused, setIsFocused] = useState(false);
@@ -36,6 +37,7 @@ const SharedInput = ({
     };
 
     const handleToggle = (e) => {
+        if (disabled) return;
         if (e) e.stopPropagation();
         checkPosition();
         onToggle();
@@ -141,6 +143,7 @@ const SharedInput = ({
     };
 
     const handleChange = (e) => {
+        if (disabled) return;
         const raw = e.target.value;
         const formatted = formatValue(raw);
         onChange(formatted);
@@ -149,7 +152,7 @@ const SharedInput = ({
     return (
         <div
             ref={containerRef}
-            className={`input-container glass-card ${isFocused ? 'focused' : ''} ${error ? 'error' : ''} drop-${dropDirection}`}
+            className={`input-container glass-card ${isFocused ? 'focused' : ''} ${error ? 'error' : ''} ${disabled ? 'disabled' : ''} drop-${dropDirection}`}
             onClick={handleToggle}
         >
             <div className="input-icon-wrapper">
@@ -163,8 +166,9 @@ const SharedInput = ({
                 className="shared-input"
                 value={value}
                 onChange={handleChange}
-                readOnly={isMobile}
+                readOnly={isMobile || disabled}
                 onFocus={(e) => {
+                    if (disabled) return;
                     setIsFocused(true);
                     checkPosition();
                     if (externalOnFocus) externalOnFocus(e);
@@ -174,6 +178,10 @@ const SharedInput = ({
                     if (externalOnBlur) externalOnBlur(e);
                 }}
                 onClick={(e) => {
+                    if (disabled) {
+                        e.stopPropagation();
+                        return;
+                    }
                     if (isMobile) {
                         handleToggle(e);
                     } else {
@@ -182,8 +190,8 @@ const SharedInput = ({
                 }}
             />
 
-            {value && onClear && (
-                <button className="clear-btn" onClick={(e) => { e.stopPropagation(); onClear(); }}>
+            {!disabled && value && onClear && (
+                <button type="button" className="clear-btn" onClick={(e) => { e.stopPropagation(); onClear(); }}>
                     <X size={14} />
                 </button>
             )}
