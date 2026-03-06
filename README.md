@@ -5,6 +5,10 @@
 
 A professional, high-performance, and responsive React Date and Time picker library. Built with **Vite**, **Framer Motion**, and **Lucide React**, it offers dedicated, premium UIs for both Desktop and Mobile devices.
 
+### 🔗 Live Demo
+[https://custom-date-time-picker.netlify.app/](https://custom-date-time-picker.netlify.app/)
+
+
 
 ---
 
@@ -137,6 +141,11 @@ function MyForm() {
 - **Framer Motion** (Animations)
 - **Lucide React** (Icons)
 - **date-fns** (Date logic)
+
+---
+
+## 🚀 Roadmap
+- [ ] **BS (Bikram Sambat Support)**: Coming soon! 🇳🇵
 
 ## 📄 License
 MIT © [Saurav Luitel](https://github.com/Saurav-627)
