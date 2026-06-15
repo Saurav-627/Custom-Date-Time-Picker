@@ -58,85 +58,100 @@ const SharedInput = ({
     const formatValue = (val) => {
         if (!mask) return val;
 
-        // Date Mask: YYYY/MM/DD
+        // Date Mask: YYYY/MM/DD (Section-based tracking)
         if (mask === 'date') {
-            const clean = val.replace(/[^0-9]/g, '');
-            let Y = clean.substring(0, 4);
-            let M = clean.substring(4, 6);
-            let D = clean.substring(6, 8);
+            const separator = val.includes('-') ? '-' : '/';
+            const parts = val.split(/[\/-]/);
+            
+            let yDigits = (parts[0] || '').replace(/[^0-9]/g, '');
+            let mDigits = (parts[1] || '').replace(/[^0-9]/g, '');
+            let dDigits = (parts[2] || '').replace(/[^0-9]/g, '');
 
-            // Auto-pad separators if digits are complete
-            let res = Y;
-            if (clean.length > 4) {
-                if (M.length === 2) M = validatePart(M, 'month');
-                res += '/' + M;
-            } else if (clean.length === 4 && val.length === 4) {
-                res += '/';
+            // Carry over excess characters to avoid overflow but support natural typing flow
+            if (yDigits.length > 4) {
+                mDigits = yDigits.substring(4) + mDigits;
+                yDigits = yDigits.substring(0, 4);
+            }
+            if (mDigits.length > 2) {
+                dDigits = mDigits.substring(2) + dDigits;
+                mDigits = mDigits.substring(0, 2);
+            }
+            if (dDigits.length > 2) {
+                dDigits = dDigits.substring(0, 2);
             }
 
-            if (clean.length > 6) {
-                if (D.length === 2) D = validatePart(D, 'day');
-                res += '/' + D;
-            } else if (clean.length === 6 && val.length === 7) {
-                res += '/';
+            // Perform range validation on completed sections
+            if (mDigits.length === 2) mDigits = validatePart(mDigits, 'month');
+            if (dDigits.length === 2) dDigits = validatePart(dDigits, 'day');
+
+            // Reconstruct the formatted date string segment by segment
+            let res = yDigits;
+            const hasMonth = parts.length > 1;
+            if (hasMonth || yDigits.length === 4) {
+                res += separator;
+                if (mDigits) res += mDigits;
             }
+
+            const hasDay = parts.length > 2;
+            if (hasDay || (mDigits.length === 2 && hasMonth)) {
+                res += separator;
+                if (dDigits) res += dDigits;
+            }
+
             return res;
         }
 
-        // Time Mask: HH:MM:SS AM/PM
+        // Time Mask: HH:MM:SS AM/PM (Section-based tracking)
         if (mask.includes('time')) {
             const is12h = mask.endsWith('-ampm');
             const hasSeconds = mask.includes('seconds');
 
-            // Clean out everything except digits and A/P
-            const digitClean = val.replace(/[^0-9]/g, '');
-            const ampmMatch = val.toLowerCase().match(/[ap]/);
+            // Clean irrelevant symbols, keeping potential AM/PM triggers
+            const cleanRaw = val.replace(/[^0-9apAP:\s]/g, '');
+            const parts = cleanRaw.split(/[:\s]+/);
+
             let ampm = '';
+            const ampmMatch = val.toLowerCase().match(/[ap]/);
             if (is12h && ampmMatch) {
                 ampm = ampmMatch[0] === 'a' ? 'AM' : 'PM';
             }
 
-            let H = digitClean.substring(0, 2);
-            let M = digitClean.substring(2, 4);
-            let S = digitClean.substring(4, 6);
+            const numParts = parts.filter(p => /^[0-9]+$/.test(p));
+            let hDigits = (numParts[0] || '').substring(0, 2);
+            let mDigits = (numParts[1] || '').substring(0, 2);
+            let sDigits = (numParts[2] || '').substring(0, 2);
 
-            // Logic for HH:MM[:SS]
-            let res = H;
-            if (digitClean.length >= 2) {
-                if (H.length === 2) H = validatePart(H, is12h ? 'hour12' : 'hour');
-                res = H + ':';
+            // Validate segments
+            if (hDigits.length === 2) hDigits = validatePart(hDigits, is12h ? 'hour12' : 'hour');
+            if (mDigits.length === 2) mDigits = validatePart(mDigits, 'minsec');
+            if (sDigits.length === 2) sDigits = validatePart(sDigits, 'minsec');
 
-                if (digitClean.length > 2) {
-                    let M = digitClean.substring(2, 4);
-                    if (M.length === 2) M = validatePart(M, 'minsec');
-                    res += M;
+            // Reconstruct the formatted time string segment by segment
+            let res = hDigits;
+            const hasMin = numParts.length > 1;
+            if (hasMin || hDigits.length === 2) {
+                res += ':';
+                if (mDigits) res += mDigits;
+            }
 
-                    if (digitClean.length >= 4) {
-                        if (hasSeconds) {
-                            res += ':';
-                            if (digitClean.length > 4) {
-                                let S = digitClean.substring(4, 6);
-                                if (S.length === 2) S = validatePart(S, 'minsec');
-                                res += S;
-
-                                if (digitClean.length >= 6 && is12h) {
-                                    res += ' ' + (ampm || '');
-                                }
-                            }
-                        } else if (is12h) {
-                            res += ' ' + (ampm || '');
-                        }
-                    }
+            if (hasSeconds) {
+                const hasSec = numParts.length > 2;
+                if (hasSec || (mDigits.length === 2 && hasMin)) {
+                    res += ':';
+                    if (sDigits) res += sDigits;
                 }
             }
 
-            // If user typed 'a' or 'p' anywhere, ensure it shows up correctly even if digits are incomplete
-            if (is12h && ampm && !res.includes(ampm)) {
-                if (!res.includes(' ')) res += ' ';
-                res += ampm;
+            if (is12h) {
+                const isComplete = hasSeconds ? (sDigits.length === 2) : (mDigits.length === 2);
+                if (ampm) {
+                    res += ' ' + ampm;
+                } else if (isComplete && val.endsWith(' ')) {
+                    res += ' ';
+                }
             }
 
-            return res.trimEnd();
+            return res;
         }
 
         return val;
@@ -144,9 +159,21 @@ const SharedInput = ({
 
     const handleChange = (e) => {
         if (disabled) return;
-        const raw = e.target.value;
+        const input = e.target;
+        const raw = input.value;
+        const selectionStart = input.selectionStart;
+
         const formatted = formatValue(raw);
         onChange(formatted);
+
+        // Stabilize cursor position in the next render cycle to prevent jumps to the end of input
+        requestAnimationFrame(() => {
+            if (input && selectionStart !== null) {
+                const diff = formatted.length - raw.length;
+                const newPos = Math.max(0, selectionStart + diff);
+                input.setSelectionRange(newPos, newPos);
+            }
+        });
     };
 
     return (

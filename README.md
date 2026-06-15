@@ -117,12 +117,15 @@ function MyForm() {
 ### DatePicker
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `value` | `string` | `""` | Date in `YYYY-MM-DD` format. |
+| `value` | `string` | `""` | Date in `YYYY-MM-DD` format (by default) or matches `outputMode`. |
 | `onChange` | `function` | `-` | Returns standard synthetic event. |
 | `placeholder` | `string` | `"YYYY/MM/DD"` | Placeholder for the input field. |
 | `name` | `string` | `-` | Name for form integration. |
 | `disabled` | `boolean` | `false` | Disables all interactions. |
 | `isDarkMode` | `boolean` | `undefined` | Forces Dark Mode (`true`) or Light Mode (`false`). Default follows system. |
+| `calendarMode`| `"AD" \| "BS"`| `"AD"` | Sets the default active calendar mode (Gregorian or Bikram Sambat). |
+| `displayMode` | `"AD" \| "BS"`| `-` | Forces the calendar UI display mode (AD or BS) and overrides the toggle. |
+| `outputMode`  | `"AD" \| "BS"`| `"AD"` | Formats the returned value string in the `onChange` event (AD is Gregorian `YYYY-MM-DD`, BS is Bikram Sambat `YYYY-MM-DD`). |
 
 ### TimePicker
 | Prop | Type | Default | Description |
@@ -136,6 +139,54 @@ function MyForm() {
 
 ---
 
+## 📅 Bikram Sambat (BS) Calendar Support
+The picker includes full, high-performance native Bikram Sambat (BS) calendar support with offline conversion (BS 2000 to BS 2100).
+
+### ⚙️ Calendar Control Configurations
+
+You can customize the initial rendering, UI constraints, and output values using three main props:
+
+1. **`calendarMode`**: Sets the default active calendar mode upon initialization.
+   - **`calendarMode="BS"`**: launches in Bikram Sambat calendar mode by default, but the toggle button is still visible for the user to switch back and forth.
+   - **`calendarMode="AD"`**: launches in Gregorian AD calendar mode by default (Default).
+
+2. **`displayMode`**: Statically forces the display mode, overriding and hiding the user-facing toggle.
+   - **`displayMode="BS"`**: Locks the UI to the Bikram Sambat (BS) calendar only. The AD/BS toggle switch is hidden.
+   - **`displayMode="AD"`**: Locks the UI to the Gregorian (AD) calendar only. The AD/BS toggle switch is hidden.
+
+3. **`outputMode`**: Controls the format of the selected date string returned in the `onChange` event callback (value stored in form state and sent to API).
+   - **`outputMode="AD"`**: Returns dates as a standard Gregorian `YYYY-MM-DD` string (e.g. `"2026-06-15"`). Matches the default HTML5 date input output, making it fully compatible with standard databases and REST APIs (Default).
+   - **`outputMode="BS"`**: Returns dates as a Bikram Sambat `YYYY-MM-DD` string (e.g. `"2083-03-01"`). Useful if your backend database is configured to handle raw BS date strings directly.
+
+### 💡 Examples
+
+#### Hybrid Mode (BS UI, AD Output for Backend Database)
+Displays the calendar in Bikram Sambat format for Nepalese users, but returns standard Gregorian format strings to keep databases compatible.
+```jsx
+<DatePicker 
+  calendarMode="BS" 
+  outputMode="AD" 
+  onChange={(e) => console.log(e.target.value)} // Emits Gregorian date e.g. "2023-09-10"
+/>
+```
+
+#### Pure BS Mode (Locked BS UI, BS Output)
+Forces the calendar to only show Bikram Sambat (removing the mode toggle) and outputs the BS date representation.
+```jsx
+<DatePicker 
+  displayMode="BS" 
+  outputMode="BS" 
+  onChange={(e) => console.log(e.target.value)} // Emits Bikram Sambat date e.g. "2080-05-24"
+/>
+```
+
+### ✨ Premium UI Visual Helpers
+- **AD/BS Toggle Switch**: An elegant, native-feeling pill toggle is displayed at the top-left of the calendar dropdown popup.
+- **Dual-Mode Subtitle Helper**: While viewing the calendar in one system, a secondary subtitle dynamically displays the equivalent month/year span in the other system in small, muted text (e.g., viewing `Falgun 2080` displays `(Feb/Mar 2024 AD)` beneath the header navigation).
+- **iOS-style Mobile Scroll Parity**: Mobile scroll wheels automatically adjust columns (years `2000-2100` and month lengths) when switching modes, displaying full month names (like `Baisakh` or `September`) and secondary translated date previews.
+
+---
+
 ## 💻 Tech Stack
 - **React** 18+
 - **Framer Motion** (Animations)
@@ -145,7 +196,8 @@ function MyForm() {
 ---
 
 ## 🚀 Roadmap
-- [ ] **BS (Bikram Sambat Support)**: Coming soon! 🇳🇵
+- [x] **BS (Bikram Sambat Support)**: Fully implemented (v1.0.5)! 🇳🇵
 
 ## 📄 License
 MIT © [Saurav Luitel](https://github.com/Saurav-627)
+

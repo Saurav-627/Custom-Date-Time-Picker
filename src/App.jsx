@@ -20,17 +20,53 @@ function Showcase() {
 
       <div className="showcase glass-card">
         <section className="picker-section">
-          <h2>Date Selection</h2>
-          <p>Calendar for desktop, scroll wheels for mobile. Now fixed to current date.</p>
-          <div className="picker-demo">
+          <h2>Date Selection & Calendar Modes</h2>
+          <p>Calendar for desktop, scroll wheels for mobile. Fully supports AD/BS modes.</p>
+          
+          <div className="picker-demo" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="demo-controls" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '12px', background: 'var(--hover-overlay)', borderRadius: '8px', fontSize: '0.85rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>Default calendarMode</label>
+                <select 
+                  value={window.__demoCalMode || 'AD'} 
+                  onChange={(e) => {
+                    window.__demoCalMode = e.target.value;
+                    // Force refresh Showcase state
+                    setSelectedDate(selectedDate);
+                  }}
+                  style={{ width: '100%', padding: '6px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                >
+                  <option value="AD">AD (Gregorian)</option>
+                  <option value="BS">BS (Bikram Sambat)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>outputMode</label>
+                <select 
+                  value={window.__demoOutMode || 'AD'} 
+                  onChange={(e) => {
+                    window.__demoOutMode = e.target.value;
+                    setSelectedDate(window.__demoOutMode === 'BS' ? '2080-05-24' : '2023-09-10');
+                  }}
+                  style={{ width: '100%', padding: '6px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                >
+                  <option value="AD">AD (Gregorian YYYY-MM-DD)</option>
+                  <option value="BS">BS (Bikram Sambat YYYY-MM-DD)</option>
+                </select>
+              </div>
+            </div>
+
             <DatePicker
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               placeholder="Select Date"
+              calendarMode={window.__demoCalMode || 'AD'}
+              outputMode={window.__demoOutMode || 'AD'}
             />
             {selectedDate && (
               <div className="status-badge">
-                Selected: {selectedDate && (typeof selectedDate === 'string' ? selectedDate : selectedDate.toDateString())}
+                Selected (Output Value): <code style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{selectedDate}</code>
               </div>
             )}
           </div>

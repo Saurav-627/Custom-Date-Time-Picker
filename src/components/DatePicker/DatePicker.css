@@ -62,7 +62,7 @@
 
 .nav-btn {
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 5px;
     border-radius: 6px;
     transition: var(--transition);
 }
@@ -97,9 +97,15 @@
     cursor: pointer;
 }
 
-.calendar-day-cell:hover {
+.calendar-day-cell:hover:not(.empty) {
     background: var(--primary-glow);
     color: var(--primary);
+}
+
+.calendar-day-cell.empty {
+    cursor: default;
+    pointer-events: none;
+    background: rgba(120, 120, 120, 0.05);
 }
 
 .calendar-day-cell.active {
@@ -110,4 +116,58 @@
 .calendar-day-cell.today {
     border: 1px solid var(--primary);
     font-weight: bold;
+}
+
+/* Calendar Mode Toggle Bar */
+.calendar-mode-toggle-bar {
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 16px 4px 16px;
+    background: transparent;
+}
+
+.mode-toggle-buttons {
+    display: flex;
+    background: var(--hover-overlay);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px;
+}
+
+.mode-toggle-btn {
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 18px;
+    color: var(--text-dim);
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+}
+
+.mode-toggle-btn.active {
+    background: var(--primary);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mode-toggle-btn:hover:not(.active) {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Secondary Mode Muted Subtitle */
+.subtitle-muted {
+    display: block;
+    font-size: 0.71rem;
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+/* Mobile Scroll Month Column spacing expansion */
+.scroll-columns .scroll-col.month-col {
+    max-width: 130px;
+    flex: 1.8;
 }
