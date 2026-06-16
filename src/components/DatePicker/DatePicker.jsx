@@ -58,7 +58,7 @@ const DatePicker = ({
         }
     }, [propDisplayMode, calendarMode]);
 
-    const parsedValue = parseDate(value, outputMode);
+    const parsedValue = parseDate(value, outputMode === 'selection' ? activeMode : outputMode);
 
     const [inputValue, setInputValue] = useState(() => {
         return parsedValue ? formatDate(parsedValue, propDisplayMode || activeMode, 'YYYY/MM/DD') : '';
@@ -136,7 +136,7 @@ const DatePicker = ({
     // Sync input values when value prop changes from outside
     useEffect(() => {
         if (!isFocused && !isOpen) {
-            const dateObj = parseDate(value, outputMode);
+            const dateObj = parseDate(value, outputMode === 'selection' ? activeMode : outputMode);
             if (dateObj) {
                 const formatted = formatDate(dateObj, propDisplayMode || activeMode, 'YYYY/MM/DD');
                 setInputValue(formatted);
@@ -152,7 +152,7 @@ const DatePicker = ({
     // Sync input field value when mode toggle changes
     useEffect(() => {
         if (isOpen) {
-            const dateObj = parseDate(value, outputMode) || tempDate;
+            const dateObj = parseDate(value, outputMode === 'selection' ? activeMode : outputMode) || tempDate;
             if (dateObj) {
                 const formatted = formatDate(dateObj, propDisplayMode || activeMode, 'YYYY/MM/DD');
                 setInputValue(formatted);
@@ -196,7 +196,7 @@ const DatePicker = ({
     const toggleOpen = () => {
         if (disabled) return;
         if (!isOpen) {
-            const dateToUse = parseDate(value, outputMode) || new Date();
+            const dateToUse = parseDate(value, outputMode === 'selection' ? activeMode : outputMode) || new Date();
             setTempDate(dateToUse);
             setCurrentMonth(dateToUse);
             setView('calendar');
@@ -206,7 +206,8 @@ const DatePicker = ({
     };
 
     const triggerChange = (date) => {
-        const formatted = date ? formatDate(date, outputMode, 'YYYY-MM-DD') : '';
+        const outMode = outputMode === 'selection' ? activeMode : outputMode;
+        const formatted = date ? formatDate(date, outMode, 'YYYY-MM-DD') : '';
         if (onChange) {
             onChange({
                 target: {
@@ -214,6 +215,25 @@ const DatePicker = ({
                     value: formatted
                 }
             });
+        }
+    };
+
+    const handleModeToggle = (mode) => {
+        if (mode === activeMode) return;
+        setActiveMode(mode);
+        if (outputMode === 'selection') {
+            const currentObj = parseDate(value, activeMode) || tempDate;
+            if (currentObj) {
+                const formatted = formatDate(currentObj, mode, 'YYYY-MM-DD');
+                if (onChange) {
+                    onChange({
+                        target: {
+                            name: name,
+                            value: formatted
+                        }
+                    });
+                }
+            }
         }
     };
 
@@ -687,14 +707,14 @@ const DatePicker = ({
                     <button
                         type="button"
                         className={`mode-toggle-btn ${activeMode === 'AD' ? 'active' : ''}`}
-                        onClick={() => setActiveMode('AD')}
+                        onClick={() => handleModeToggle('AD')}
                     >
                         AD
                     </button>
                     <button
                         type="button"
                         className={`mode-toggle-btn ${activeMode === 'BS' ? 'active' : ''}`}
-                        onClick={() => setActiveMode('BS')}
+                        onClick={() => handleModeToggle('BS')}
                     >
                         BS
                     </button>

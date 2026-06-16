@@ -125,7 +125,7 @@ function MyForm() {
 | `isDarkMode` | `boolean` | `undefined` | Forces Dark Mode (`true`) or Light Mode (`false`). Default follows system. |
 | `calendarMode`| `"AD" \| "BS"`| `"AD"` | Sets the default active calendar mode (Gregorian or Bikram Sambat). |
 | `displayMode` | `"AD" \| "BS"`| `-` | Forces the calendar UI display mode (AD or BS) and overrides the toggle. |
-| `outputMode`  | `"AD" \| "BS"`| `"AD"` | Formats the returned value string in the `onChange` event (AD is Gregorian `YYYY-MM-DD`, BS is Bikram Sambat `YYYY-MM-DD`). |
+| `outputMode`  | `"AD" \| "BS" \| "selection"`| `"AD"` | Formats the returned value string in the `onChange` event (AD is Gregorian `YYYY-MM-DD`, BS is Bikram Sambat `YYYY-MM-DD`, selection matches active mode). |
 
 ### TimePicker
 | Prop | Type | Default | Description |
@@ -157,6 +157,7 @@ You can customize the initial rendering, UI constraints, and output values using
 3. **`outputMode`**: Controls the format of the selected date string returned in the `onChange` event callback (value stored in form state and sent to API).
    - **`outputMode="AD"`**: Returns dates as a standard Gregorian `YYYY-MM-DD` string (e.g. `"2026-06-15"`). Matches the default HTML5 date input output, making it fully compatible with standard databases and REST APIs (Default).
    - **`outputMode="BS"`**: Returns dates as a Bikram Sambat `YYYY-MM-DD` string (e.g. `"2083-03-01"`). Useful if your backend database is configured to handle raw BS date strings directly.
+   - **`outputMode="selection"`**: Dynamically matches the format to the currently selected calendar mode. If the calendar is in BS mode, it returns the BS date string (e.g. `"2080-05-24"`). If the calendar is in AD mode, it returns the AD date string (e.g. `"2023-09-10"`). Toggling the calendar dynamically updates and emits the formatted string to parent state.
 
 ### 💡 Examples
 
@@ -177,6 +178,15 @@ Forces the calendar to only show Bikram Sambat (removing the mode toggle) and ou
   displayMode="BS" 
   outputMode="BS" 
   onChange={(e) => console.log(e.target.value)} // Emits Bikram Sambat date e.g. "2080-05-24"
+/>
+```
+
+#### Selection Mode (Dynamic Output Based on Calendar Selection)
+Dynamically switches formatting output to align with whichever calendar system is currently active in the DatePicker.
+```jsx
+<DatePicker 
+  outputMode="selection" 
+  onChange={(e) => console.log(e.target.value)} // Emits BS if toggled to BS, AD if toggled to AD
 />
 ```
 

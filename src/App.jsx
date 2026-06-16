@@ -47,12 +47,19 @@ function Showcase() {
                   value={window.__demoOutMode || 'AD'} 
                   onChange={(e) => {
                     window.__demoOutMode = e.target.value;
-                    setSelectedDate(window.__demoOutMode === 'BS' ? '2080-05-24' : '2023-09-10');
+                    if (window.__demoOutMode === 'BS') {
+                      setSelectedDate('2080-05-24');
+                    } else if (window.__demoOutMode === 'AD') {
+                      setSelectedDate('2023-09-10');
+                    } else {
+                      setSelectedDate(window.__demoCalMode === 'BS' ? '2080-05-24' : '2023-09-10');
+                    }
                   }}
                   style={{ width: '100%', padding: '6px', borderRadius: '4px', background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)' }}
                 >
                   <option value="AD">AD (Gregorian YYYY-MM-DD)</option>
                   <option value="BS">BS (Bikram Sambat YYYY-MM-DD)</option>
+                  <option value="selection">Selection (Matches Active Calendar Mode)</option>
                 </select>
               </div>
             </div>
