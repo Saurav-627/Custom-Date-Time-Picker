@@ -22,7 +22,9 @@ import {
     generateCalendarGrid,
     getAdMonthName,
     getNextMonth,
-    getPrevMonth
+    getPrevMonth,
+    minBSYear,
+    maxBSYear
 } from '../../utils/calendar';
 
 const DatePicker = ({
@@ -117,7 +119,7 @@ const DatePicker = ({
 
     // Dynamic Mobile scroll columns based on calendar mode
     const mobileYears = activeMode === 'BS'
-        ? Array.from({ length: 101 }, (_, i) => 2000 + i) // BS Range 2000 - 2100
+        ? Array.from({ length: maxBSYear - minBSYear + 1 }, (_, i) => minBSYear + i) // Dynamic BS Range
         : Array.from({ length: 151 }, (_, i) => new Date().getFullYear() - 100 + i);
 
     const mobileMonths = activeMode === 'BS' ? BS_MONTHS : AD_MONTHS;
@@ -344,7 +346,7 @@ const DatePicker = ({
                 <div className="calendar-header">
                     <button type="button" onClick={() => {
                         if (activeMode === 'BS') {
-                            const newBsYear = Math.max(2000, currentYearVal - 12);
+                            const newBsYear = Math.max(minBSYear, currentYearVal - 12);
                             const newAdDate = bsToAd(newBsYear, bsView ? bsView.month : 0, 1);
                             if (newAdDate) setCurrentMonth(newAdDate);
                         } else {
@@ -354,7 +356,7 @@ const DatePicker = ({
                     <span>Select Year</span>
                     <button type="button" onClick={() => {
                         if (activeMode === 'BS') {
-                            const newBsYear = Math.min(2100, currentYearVal + 12);
+                            const newBsYear = Math.min(maxBSYear, currentYearVal + 12);
                             const newAdDate = bsToAd(newBsYear, bsView ? bsView.month : 0, 1);
                             if (newAdDate) setCurrentMonth(newAdDate);
                         } else {
@@ -364,7 +366,7 @@ const DatePicker = ({
                 </div>
                 <div className="grid-selector column-3">
                     {yearsGrid.map(y => {
-                        const isDisabled = activeMode === 'BS' && (y < 2000 || y > 2100);
+                        const isDisabled = activeMode === 'BS' && (y < minBSYear || y > maxBSYear);
                         return (
                             <button
                                 type='button'

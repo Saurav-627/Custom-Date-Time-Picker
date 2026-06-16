@@ -14,8 +14,8 @@ let cumulativeDays = 0;
 
 // Initialize caches
 const yearKeys = Object.keys(BS_DATA).map(Number).sort((a, b) => a - b);
-const minBSYear = yearKeys[0];
-const maxBSYear = yearKeys[yearKeys.length - 1];
+export const minBSYear = yearKeys[0];
+export const maxBSYear = yearKeys[yearKeys.length - 1];
 
 for (let y = minBSYear; y <= maxBSYear; y++) {
   const months = BS_DATA[y];
