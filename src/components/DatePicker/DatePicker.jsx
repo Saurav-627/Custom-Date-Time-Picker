@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { format, isValid, addMonths, subMonths } from 'date-fns';
+import { format, isValid, addMonths, subMonths, addYears, subYears } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import SharedInput from '../Shared/SharedInput';
 import { useMobile } from '../../hooks/useMediaQuery';
@@ -80,12 +80,10 @@ const DatePicker = ({
     const updatePosition = () => {
         if (!pickerRef.current) return;
         const rect = pickerRef.current.getBoundingClientRect();
-        
         // Check if there is enough space below the input (approx 380px)
         const spaceBelow = window.innerHeight - rect.bottom;
         const showAbove = spaceBelow < 380 && rect.top > 380;
-        
-        const top = showAbove 
+        const top = showAbove
             ? rect.top + window.scrollY - 380
             : rect.bottom + window.scrollY + 8;
 
@@ -101,14 +99,11 @@ const DatePicker = ({
         if (isOpen && !isMobile) {
             updatePosition();
             const id = requestAnimationFrame(updatePosition);
-            
             const handleScrollResize = () => {
                 updatePosition();
             };
-            
             window.addEventListener('resize', handleScrollResize);
             window.addEventListener('scroll', handleScrollResize, true);
-            
             return () => {
                 cancelAnimationFrame(id);
                 window.removeEventListener('resize', handleScrollResize);
@@ -212,8 +207,10 @@ const DatePicker = ({
             onChange({
                 target: {
                     name: name,
-                    value: formatted
-                }
+                    value: formatted,
+                    mode: activeMode
+                },
+                mode: activeMode
             });
         }
     };
@@ -229,8 +226,10 @@ const DatePicker = ({
                     onChange({
                         target: {
                             name: name,
-                            value: formatted
-                        }
+                            value: formatted,
+                            mode: mode
+                        },
+                        mode: mode
                     });
                 }
             }
@@ -266,6 +265,15 @@ const DatePicker = ({
             setInputValue(formatDate(date, propDisplayMode || activeMode, 'YYYY/MM/DD'));
             setIsOpen(false);
         }
+    };
+
+    const handleTodayClick = () => {
+        const today = new Date();
+        setCurrentMonth(today);
+        setTempDate(today);
+        setView('calendar');
+        triggerChange(today);
+        setInputValue(formatDate(today, propDisplayMode || activeMode, 'YYYY/MM/DD'));
     };
 
     const handleYearSelect = (year) => {
@@ -370,7 +378,7 @@ const DatePicker = ({
                             const newAdDate = bsToAd(newBsYear, bsView ? bsView.month : 0, 1);
                             if (newAdDate) setCurrentMonth(newAdDate);
                         } else {
-                            setCurrentMonth(subMonths(currentMonth, 12));
+                            setCurrentMonth(subYears(currentMonth, 12));
                         }
                     }}><ChevronLeft size={16} /></button>
                     <span>Select Year</span>
@@ -380,7 +388,7 @@ const DatePicker = ({
                             const newAdDate = bsToAd(newBsYear, bsView ? bsView.month : 0, 1);
                             if (newAdDate) setCurrentMonth(newAdDate);
                         } else {
-                            setCurrentMonth(addMonths(currentMonth, 12));
+                            setCurrentMonth(addYears(currentMonth, 12));
                         }
                     }}><ChevronRight size={16} /></button>
                 </div>
@@ -502,6 +510,15 @@ const DatePicker = ({
                     {Array(42 - (grid.emptyDaysCount + grid.days.length)).fill(null).map((_, i) => (
                         <div key={`empty-trail-${i}`} className="calendar-day-cell empty" />
                     ))}
+                </div>
+                <div className="calendar-footer">
+                    <button
+                        type="button"
+                        className="today-btn"
+                        onClick={handleTodayClick}
+                    >
+                        Today
+                    </button>
                 </div>
             </div>
         );

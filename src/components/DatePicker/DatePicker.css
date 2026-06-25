@@ -171,3 +171,28 @@
     max-width: 130px;
     flex: 1.8;
 }
+
+/* Calendar Footer & Today Button */
+.calendar-footer {
+    color: #3B82F6;
+    margin-top: 5px;
+    padding-top: 3px;
+    border-top: 1px solid var(--border);
+}
+
+.today-btn {
+    padding: 3px 6px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--primary-glow);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.today-btn:hover {
+    background: var(--primary);
+    color: white;
+}

@@ -22,7 +22,7 @@ A professional, high-performance, and responsive React Date and Time picker libr
   - **Elegant Calendar**: Full-featured grid with quick navigation between months and years.
   - **Grid Time Select**: Fast and efficient grid selection for precision time setting.
 - **🔌 Form Ready (NEW in v1.0.1)**:
-  - **Synthetic Events**: Emits standard `{ target: { name, value } }` objects.
+  - **Synthetic Events**: Emits standard `{ target: { name, value, mode } }` objects (exposing the active calendar system).
   - **Drop-in Support**: Seamlessly integrates with **React Hook Form**, **Formik**, and **Yup**.
   - **Standard Formats**: Always returns standard strings (`YYYY-MM-DD` and `HH:mm`).
 - **🛡️ Submission Protection**: All internal buttons are typed as `type="button"` to prevent accidental parent form submissions.
@@ -118,7 +118,7 @@ function MyForm() {
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `value` | `string` | `""` | Date in `YYYY-MM-DD` format (by default) or matches `outputMode`. |
-| `onChange` | `function` | `-` | Returns standard synthetic event. |
+| `onChange` | `function` | `-` | Returns standard synthetic event. Includes active calendar mode in `event.target.mode` and `event.mode`. |
 | `placeholder` | `string` | `"YYYY/MM/DD"` | Placeholder for the input field. |
 | `name` | `string` | `-` | Name for form integration. |
 | `disabled` | `boolean` | `false` | Disables all interactions. |
@@ -126,6 +126,17 @@ function MyForm() {
 | `calendarMode`| `"AD" \| "BS"`| `"AD"` | Sets the default active calendar mode (Gregorian or Bikram Sambat). |
 | `displayMode` | `"AD" \| "BS"`| `-` | Forces the calendar UI display mode (AD or BS) and overrides the toggle. |
 | `outputMode`  | `"AD" \| "BS" \| "selection"`| `"AD"` | Formats the returned value string in the `onChange` event (AD is Gregorian `YYYY-MM-DD`, BS is Bikram Sambat `YYYY-MM-DD`, selection matches active mode). |
+
+### Synthetic Event Structure (`DatePicker` `onChange`)
+The `onChange` event object simulates a standard React input change event, with extra properties:
+```javascript
+onChange={(e) => {
+  console.log(e.target.value); // Selected date string (e.g. "2026-06-25")
+  console.log(e.target.name);  // Input name prop (if passed)
+  console.log(e.target.mode);  // Currently active calendar mode ("AD" or "BS")
+  console.log(e.mode);         // Convenience shortcut for e.target.mode
+}}
+```
 
 ### TimePicker
 | Prop | Type | Default | Description |
@@ -192,8 +203,19 @@ Dynamically switches formatting output to align with whichever calendar system i
 
 ### ✨ Premium UI Visual Helpers
 - **AD/BS Toggle Switch**: An elegant, native-feeling pill toggle is displayed at the top-left of the calendar dropdown popup.
+- **Today Navigation Helper (Desktop)**: A clean footer button to quickly jump to and highlight today's date on the calendar.
 - **Dual-Mode Subtitle Helper**: While viewing the calendar in one system, a secondary subtitle dynamically displays the equivalent month/year span in the other system in small, muted text (e.g., viewing `Falgun 2080` displays `(Feb/Mar 2024 AD)` beneath the header navigation).
 - **iOS-style Mobile Scroll Parity**: Mobile scroll wheels automatically adjust columns (years `2000-2100` and month lengths) when switching modes, displaying full month names (like `Baisakh` or `September`) and secondary translated date previews.
+
+### 📦 Reusing the Bikram Sambat Dataset (`BS_DATA`)
+To prevent duplicating Bikram Sambat calendar day count definitions in your parent applications or backend validators, you can import the raw validated calendar dataset configuration directly:
+```javascript
+import { BS_DATA } from '@sauravluitel/date-time-picker-custom';
+
+// Keyed by year strings, containing 12 integers representing the number of days in each month:
+console.log(BS_DATA["2083"]);
+// => [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30]
+```
 
 ---
 
