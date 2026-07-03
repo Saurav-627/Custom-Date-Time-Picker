@@ -168,7 +168,7 @@ You can customize the initial rendering, UI constraints, and output values using
 3. **`outputMode`**: Controls the format of the selected date string returned in the `onChange` event callback (value stored in form state and sent to API).
    - **`outputMode="AD"`**: Returns dates as a standard Gregorian `YYYY-MM-DD` string (e.g. `"2026-06-15"`). Matches the default HTML5 date input output, making it fully compatible with standard databases and REST APIs (Default).
    - **`outputMode="BS"`**: Returns dates as a Bikram Sambat `YYYY-MM-DD` string (e.g. `"2083-03-01"`). Useful if your backend database is configured to handle raw BS date strings directly.
-   - **`outputMode="selection"`**: Dynamically matches the format to the currently selected calendar mode. If the calendar is in BS mode, it returns the BS date string (e.g. `"2080-05-24"`). If the calendar is in AD mode, it returns the AD date string (e.g. `"2023-09-10"`). Toggling the calendar dynamically updates and emits the formatted string to parent state.
+   - **`outputMode="selection"`**: Dynamically matches the format to the currently selected calendar mode. If the calendar is in BS mode, it returns the BS date string (e.g. `"2080-05-24"`). If the calendar is in AD mode, it returns the AD date string (e.g. `"2023-09-10"`). The selected date is formatted and emitted to the parent state upon day selection or mobile confirmation.
 
 ### 💡 Examples
 
@@ -197,7 +197,7 @@ Dynamically switches formatting output to align with whichever calendar system i
 ```jsx
 <DatePicker 
   outputMode="selection" 
-  onChange={(e) => console.log(e.target.value)} // Emits BS if toggled to BS, AD if toggled to AD
+  onChange={(e) => console.log(e.target.value)} // Emits selected date formatted in active mode (BS or AD)
 />
 ```
 

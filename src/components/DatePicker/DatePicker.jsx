@@ -49,16 +49,17 @@ const DatePicker = ({
     const [activeMode, setActiveMode] = useState(() => {
         return propDisplayMode || calendarMode || 'AD';
     });
+    const [confirmedMode, setConfirmedMode] = useState(() => {
+        return propDisplayMode || calendarMode || 'AD';
+    });
 
     useEffect(() => {
-        if (propDisplayMode) {
-            setActiveMode(propDisplayMode);
-        } else if (calendarMode) {
-            setActiveMode(calendarMode);
-        }
+        const targetMode = propDisplayMode || calendarMode || 'AD';
+        setActiveMode(targetMode);
+        setConfirmedMode(targetMode);
     }, [propDisplayMode, calendarMode]);
 
-    const parsedValue = parseDate(value, outputMode === 'selection' ? activeMode : outputMode);
+    const parsedValue = parseDate(value, outputMode === 'selection' ? confirmedMode : outputMode);
 
     const [inputValue, setInputValue] = useState(() => {
         return parsedValue ? formatDate(parsedValue, propDisplayMode || activeMode, 'YYYY/MM/DD') : '';
@@ -128,12 +129,16 @@ const DatePicker = ({
     }
     const daysArr = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    // Sync input values when value prop changes from outside
+    // Sync input values when value prop changes from outside or calendar closes
     useEffect(() => {
         if (!isFocused && !isOpen) {
-            const dateObj = parseDate(value, outputMode === 'selection' ? activeMode : outputMode);
+            if (activeMode !== confirmedMode) {
+                setActiveMode(confirmedMode);
+                return;
+            }
+            const dateObj = parseDate(value, outputMode === 'selection' ? confirmedMode : outputMode);
             if (dateObj) {
-                const formatted = formatDate(dateObj, propDisplayMode || activeMode, 'YYYY/MM/DD');
+                const formatted = formatDate(dateObj, propDisplayMode || confirmedMode, 'YYYY/MM/DD');
                 setInputValue(formatted);
                 setCurrentMonth(dateObj);
                 setTempDate(dateObj);
@@ -142,16 +147,14 @@ const DatePicker = ({
                 setTempDate(new Date());
             }
         }
-    }, [value, isFocused, isOpen, outputMode, propDisplayMode, activeMode]);
+    }, [value, isFocused, isOpen, outputMode, propDisplayMode, activeMode, confirmedMode]);
 
     // Sync input field value when mode toggle changes
     useEffect(() => {
         if (isOpen) {
-            const dateObj = parseDate(value, outputMode === 'selection' ? activeMode : outputMode) || tempDate;
-            if (dateObj) {
-                const formatted = formatDate(dateObj, propDisplayMode || activeMode, 'YYYY/MM/DD');
-                setInputValue(formatted);
-            }
+            const dateObj = tempDate || parseDate(value, outputMode === 'selection' ? confirmedMode : outputMode) || new Date();
+            const formatted = formatDate(dateObj, propDisplayMode || activeMode, 'YYYY/MM/DD');
+            setInputValue(formatted);
         }
     }, [activeMode]);
 
@@ -191,7 +194,7 @@ const DatePicker = ({
     const toggleOpen = () => {
         if (disabled) return;
         if (!isOpen) {
-            const dateToUse = parseDate(value, outputMode === 'selection' ? activeMode : outputMode) || new Date();
+            const dateToUse = parseDate(value, outputMode === 'selection' ? confirmedMode : outputMode) || new Date();
             setTempDate(dateToUse);
             setCurrentMonth(dateToUse);
             setView('calendar');
@@ -213,27 +216,12 @@ const DatePicker = ({
                 mode: activeMode
             });
         }
+        setConfirmedMode(activeMode);
     };
 
     const handleModeToggle = (mode) => {
         if (mode === activeMode) return;
         setActiveMode(mode);
-        if (outputMode === 'selection') {
-            const currentObj = parseDate(value, activeMode) || tempDate;
-            if (currentObj) {
-                const formatted = formatDate(currentObj, mode, 'YYYY-MM-DD');
-                if (onChange) {
-                    onChange({
-                        target: {
-                            name: name,
-                            value: formatted,
-                            mode: mode
-                        },
-                        mode: mode
-                    });
-                }
-            }
-        }
     };
 
     const handleConfirm = () => {
@@ -419,7 +407,7 @@ const DatePicker = ({
             activeMode === 'BS' ? (bsView ? bsView.year : 2080) : currentMonth.getFullYear(),
             activeMode === 'BS' ? (bsView ? bsView.month : 0) : currentMonth.getMonth(),
             activeMode,
-            parsedValue
+            tempDate
         );
 
         if (view === 'year') return renderYears();
